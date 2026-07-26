@@ -345,10 +345,7 @@
       outline: none;
     }
 
-    .queue-item:focus-within {
-      border-color: var(--color-ink);
-      box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-ink);
-    }
+    .queue-item-link:focus-visible { box-shadow: inset 0 0 0 2px var(--color-ink); }
 
     .queue-item-head {
       justify-content: space-between;
@@ -377,6 +374,8 @@
       min-width: 0;
       padding: var(--space-lg) var(--space-sm) var(--space-2xl);
     }
+
+    .exception-workbench-canvas { background: var(--color-paper-sunken); }
 
     .canvas-header {
       display: flex;
@@ -1328,108 +1327,6 @@
     </div>
   </section>
 
-  <section class="page-view exception-detail-shell" id="lowConfidenceView" aria-labelledby="lowConfidenceTitle" hidden>
-    <div class="exception-detail-inner">
-      <header class="exception-detail-header">
-        <div>
-          <p class="section-kicker">云帆科技（上海）有限公司 · 低置信度</p>
-          <h1 class="exception-detail-title" id="lowConfidenceTitle">为这张差旅费报销单选择正确科目</h1>
-          <div class="exception-detail-meta">
-            <span class="mono">TASK-2026-07-024</span>
-            <span class="mono">ITEM-014</span>
-            <span>科目推荐置信度 57%</span>
-          </div>
-        </div>
-        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
-      </header>
-
-      <div class="exception-detail-grid">
-        <section class="exception-detail-card" aria-labelledby="lowEvidenceTitle">
-          <div class="exception-reason">
-            <strong>为什么需要会计选择</strong>
-            <p>资料识别和流水匹配都已完成，但报销单只写了“客户现场沟通”，无法确定应计入管理费用还是销售费用。科目推荐置信度 57%，低于 60% 的人工处理线。</p>
-          </div>
-          <h2 id="lowEvidenceTitle">原始资料和 AI 判断</h2>
-          <dl class="fact-list">
-            <div class="fact-row"><dt>原始资料</dt><dd>差旅费报销单 DOC-EXP-0716</dd><span class="fact-confidence">识别 96%</span></div>
-            <div class="fact-row"><dt>报销摘要</dt><dd>客户现场沟通 · 住宿费</dd><span class="fact-confidence">字段位置：第 3 行</span></div>
-            <div class="fact-row"><dt>匹配流水</dt><dd>招商银行 · 2026-07-17 · ¥1,680.00</dd><span class="fact-confidence">匹配 93%</span></div>
-            <div class="fact-row"><dt>AI 推荐科目</dt><dd>管理费用—差旅费</dd><span class="fact-confidence">推荐 57%</span></div>
-            <div class="fact-row"><dt>推荐依据</dt><dd>摘要包含“差旅”和“住宿”，但缺少费用归属部门</dd><span class="fact-confidence">VoucherAgent</span></div>
-          </dl>
-        </section>
-
-        <form class="exception-detail-card exception-action" id="lowConfidenceForm" aria-labelledby="lowActionTitle">
-          <h2 id="lowActionTitle">人工选择会计科目</h2>
-          <div class="subject-options">
-            <label class="subject-option"><input type="radio" name="subject" value="管理费用—差旅费"><span class="subject-copy"><strong>管理费用—差旅费</strong><span>AI 首选；适用于行政或内部管理活动</span></span><span class="subject-confidence">57%</span></label>
-            <label class="subject-option"><input type="radio" name="subject" value="销售费用—差旅费"><span class="subject-copy"><strong>销售费用—差旅费</strong><span>适用于客户拓展或销售活动</span></span><span class="subject-confidence">28%</span></label>
-            <label class="subject-option"><input type="radio" name="subject" value="管理费用—办公费"><span class="subject-copy"><strong>管理费用—办公费</strong><span>其他历史凭证中的少量候选</span></span><span class="subject-confidence">15%</span></label>
-          </div>
-          <label class="field-label" for="lowConfidenceReason">选择理由
-            <textarea id="lowConfidenceReason" placeholder="例如：本次出差由销售部门发起，用于客户拜访。"></textarea>
-          </label>
-          <div class="exception-impact">保存后，系统会根据会计的选择更新凭证草稿。新草稿仍需审核人员批准，AI 不会写入正式账簿。</div>
-          <p class="exception-action-status" id="lowConfidenceStatus" aria-live="polite">请选择科目并填写理由。</p>
-          <button class="button button-primary" type="submit" id="lowConfidenceButton">确认科目并更新草稿</button>
-          <div class="exception-record" id="lowConfidenceRecord" hidden></div>
-          <div id="lowConfidenceReviewPanel" hidden>
-            <h2>审核人员核对新草稿</h2>
-            <div class="risk-checks">
-              <label class="risk-check"><input type="checkbox" id="lowSubjectCheck"><span>我已核对人工选择的科目和选择理由。</span></label>
-              <label class="risk-check"><input type="checkbox" id="lowDraftCheck"><span>我已核对更新后的凭证草稿，确认可以批准。</span></label>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <section class="page-view exception-detail-shell" id="highAmountView" aria-labelledby="highAmountTitle" hidden>
-    <div class="exception-detail-inner">
-      <header class="exception-detail-header">
-        <div>
-          <p class="section-kicker">云帆科技（上海）有限公司 · 高金额</p>
-          <h1 class="exception-detail-title" id="highAmountTitle">审核这笔 ¥68,420.00 的设备采购</h1>
-          <div class="exception-detail-meta">
-            <span class="mono">TASK-2026-07-024</span>
-            <span class="mono">ITEM-021</span>
-            <span>账套人工审核线：¥50,000.00</span>
-          </div>
-        </div>
-        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
-      </header>
-
-      <div class="exception-detail-grid">
-        <section class="exception-detail-card" aria-labelledby="highEvidenceTitle">
-          <div class="exception-reason">
-            <strong>为什么置信度高仍需人工审核</strong>
-            <p>本账套规定，单笔金额达到 ¥50,000.00 必须逐笔人工批准。这条风险规则优先于置信度，因此系统没有把该草稿放入批量审核。</p>
-          </div>
-          <h2 id="highEvidenceTitle">原始资料和 AI 判断</h2>
-          <dl class="fact-list">
-            <div class="fact-row"><dt>采购发票</dt><dd>服务器与显示器 · DOC-EQUIP-0719 · ¥68,420.00</dd><span class="fact-confidence">识别 99%</span></div>
-            <div class="fact-row"><dt>匹配流水</dt><dd>招商银行 · 2026-07-21 · ¥68,420.00</dd><span class="fact-confidence">匹配 96%</span></div>
-            <div class="fact-row"><dt>凭证草稿</dt><dd>借：固定资产—电子设备　贷：银行存款</dd><span class="fact-confidence">推荐 93%</span></div>
-            <div class="fact-row"><dt>推荐依据</dt><dd>发票商品为服务器和显示器；金额、日期与流水一致</dd><span class="fact-confidence">VoucherAgent</span></div>
-          </dl>
-        </section>
-
-        <form class="exception-detail-card exception-action" id="highAmountForm" aria-labelledby="highActionTitle">
-          <h2 id="highActionTitle">逐笔批准前确认</h2>
-          <div class="risk-checks">
-            <label class="risk-check"><input type="checkbox" id="highMatchCheck"><span>我已核对发票和银行流水，确认属于同一笔采购。</span></label>
-            <label class="risk-check"><input type="checkbox" id="highVoucherCheck"><span>我已核对金额和会计科目，确认凭证草稿无误。</span></label>
-          </div>
-          <div class="exception-impact">批准后，这份草稿进入“已批准待导出”。正式入账仍由会计在外部记账系统完成。</div>
-          <p class="exception-action-status" id="highAmountStatus" aria-live="polite">完成两项核对后才能批准。</p>
-          <button class="button button-primary" type="submit" id="highAmountButton" disabled>批准这份高金额草稿</button>
-          <div class="exception-record" id="highAmountRecord" hidden></div>
-        </form>
-      </div>
-    </div>
-  </section>
-
   <section class="page-view exception-detail-shell" id="conflictReviewView" aria-labelledby="conflictReviewTitle" hidden>
     <div class="exception-detail-inner">
       <header class="exception-detail-header">
@@ -1655,7 +1552,7 @@
         </div>
         <div class="context-fact">
           <span class="context-label">待人工确认</span>
-          <span class="context-value mono">3 项</span>
+          <span class="context-value mono" id="sharedPendingCount">3 项</span>
         </div>
       </div>
     </header>
@@ -1664,7 +1561,7 @@
       <div class="process-guide">
         <div class="process-guide-copy">
           <h2 class="process-title" id="processTitle">本批资料处理进度</h2>
-          <p class="process-explanation">AI 会先识别资料、匹配银行流水，再生成凭证草稿；遇到冲突时交给会计确认。</p>
+          <p class="process-explanation" id="processExplanation">AI 会先识别资料、匹配银行流水，再生成凭证草稿；遇到冲突时交给会计确认。</p>
         </div>
         <span class="process-current" id="processCurrent">当前：第 4 步</span>
       </div>
@@ -1707,9 +1604,9 @@
     <main class="workbench">
       <aside class="decision-queue" aria-label="需要会计处理的项目">
         <h2 class="queue-heading">需要会计处理</h2>
-        <p class="queue-summary">共 3 项，先处理会阻断后续步骤的异常</p>
+        <p class="queue-summary" id="queueSummary">共 3 项，当前处理第 1 项</p>
         <ol class="queue-list">
-          <li class="queue-item is-current">
+          <li class="queue-item is-current" data-exception-route="conflict">
             <a class="queue-item-link" href="#conflict/ITEM-009" aria-current="page">
               <div class="queue-item-head">
                 <span class="risk-label">金额冲突</span>
@@ -1719,7 +1616,7 @@
               <p class="queue-detail">发票与银行流水相差 ¥200.00</p>
             </a>
           </li>
-          <li class="queue-item">
+          <li class="queue-item" data-exception-route="lowConfidence">
             <a class="queue-item-link" href="#low-confidence/ITEM-014">
               <div class="queue-item-head">
                 <span class="risk-label">低置信度</span>
@@ -1729,7 +1626,7 @@
               <p class="queue-detail">科目推荐置信度 57%</p>
             </a>
           </li>
-          <li class="queue-item">
+          <li class="queue-item" data-exception-route="highAmount">
             <a class="queue-item-link" href="#high-amount/ITEM-021">
               <div class="queue-item-head">
                 <span class="risk-label">高金额</span>
@@ -1742,7 +1639,7 @@
         </ol>
       </aside>
 
-      <section class="decision-canvas" aria-labelledby="caseTitle">
+      <section class="decision-canvas exception-workbench-canvas" id="conflictDecisionView" aria-labelledby="caseTitle">
         <header class="canvas-header">
           <span class="case-status" id="caseStatus">资料冲突 · 必须人工处理</span>
           <h1 id="caseTitle">这笔交易应以哪个金额继续匹配？</h1>
@@ -1819,6 +1716,106 @@
           </ol>
         </section>
       </section>
+
+      <section class="decision-canvas exception-workbench-canvas" id="lowConfidenceView" aria-labelledby="lowConfidenceTitle" hidden>
+        <div class="exception-detail-inner">
+          <header class="exception-detail-header">
+            <div>
+              <p class="section-kicker">第 2 / 3 项 · 低置信度</p>
+              <h1 class="exception-detail-title" id="lowConfidenceTitle">为这张差旅费报销单选择正确科目</h1>
+              <div class="exception-detail-meta">
+                <span class="mono">TASK-2026-07-024</span>
+                <span class="mono">ITEM-014</span>
+                <span>科目推荐置信度 57%</span>
+              </div>
+            </div>
+          </header>
+
+          <div class="exception-detail-grid">
+            <section class="exception-detail-card" aria-labelledby="lowEvidenceTitle">
+              <div class="exception-reason">
+                <strong>为什么需要会计选择</strong>
+                <p>资料识别和流水匹配都已完成，但报销单只写了“客户现场沟通”，无法确定应计入管理费用还是销售费用。科目推荐置信度 57%，低于 60% 的人工处理线。</p>
+              </div>
+              <h2 id="lowEvidenceTitle">原始资料和 AI 判断</h2>
+              <dl class="fact-list">
+                <div class="fact-row"><dt>原始资料</dt><dd>差旅费报销单 DOC-EXP-0716</dd><span class="fact-confidence">识别 96%</span></div>
+                <div class="fact-row"><dt>报销摘要</dt><dd>客户现场沟通 · 住宿费</dd><span class="fact-confidence">字段位置：第 3 行</span></div>
+                <div class="fact-row"><dt>匹配流水</dt><dd>招商银行 · 2026-07-17 · ¥1,680.00</dd><span class="fact-confidence">匹配 93%</span></div>
+                <div class="fact-row"><dt>AI 推荐科目</dt><dd>管理费用—差旅费</dd><span class="fact-confidence">推荐 57%</span></div>
+                <div class="fact-row"><dt>推荐依据</dt><dd>摘要包含“差旅”和“住宿”，但缺少费用归属部门</dd><span class="fact-confidence">VoucherAgent</span></div>
+              </dl>
+            </section>
+
+            <form class="exception-detail-card exception-action" id="lowConfidenceForm" aria-labelledby="lowActionTitle">
+              <h2 id="lowActionTitle">人工选择会计科目</h2>
+              <div class="subject-options">
+                <label class="subject-option"><input type="radio" name="subject" value="管理费用—差旅费"><span class="subject-copy"><strong>管理费用—差旅费</strong><span>AI 首选；适用于行政或内部管理活动</span></span><span class="subject-confidence">57%</span></label>
+                <label class="subject-option"><input type="radio" name="subject" value="销售费用—差旅费"><span class="subject-copy"><strong>销售费用—差旅费</strong><span>适用于客户拓展或销售活动</span></span><span class="subject-confidence">28%</span></label>
+                <label class="subject-option"><input type="radio" name="subject" value="管理费用—办公费"><span class="subject-copy"><strong>管理费用—办公费</strong><span>其他历史凭证中的少量候选</span></span><span class="subject-confidence">15%</span></label>
+              </div>
+              <label class="field-label" for="lowConfidenceReason">选择理由
+                <textarea id="lowConfidenceReason" placeholder="例如：本次出差由销售部门发起，用于客户拜访。"></textarea>
+              </label>
+              <div class="exception-impact">保存后，系统会根据会计的选择更新凭证草稿。新草稿仍需审核人员批准，AI 不会写入正式账簿。</div>
+              <p class="exception-action-status" id="lowConfidenceStatus" aria-live="polite">请选择科目并填写理由。</p>
+              <button class="button button-primary" type="submit" id="lowConfidenceButton">确认科目并更新草稿</button>
+              <div class="exception-record" id="lowConfidenceRecord" hidden></div>
+              <div id="lowConfidenceReviewPanel" hidden>
+                <h2>审核人员核对新草稿</h2>
+                <div class="risk-checks">
+                  <label class="risk-check"><input type="checkbox" id="lowSubjectCheck"><span>我已核对人工选择的科目和选择理由。</span></label>
+                  <label class="risk-check"><input type="checkbox" id="lowDraftCheck"><span>我已核对更新后的凭证草稿，确认可以批准。</span></label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <section class="decision-canvas exception-workbench-canvas" id="highAmountView" aria-labelledby="highAmountTitle" hidden>
+        <div class="exception-detail-inner">
+          <header class="exception-detail-header">
+            <div>
+              <p class="section-kicker">第 3 / 3 项 · 高金额</p>
+              <h1 class="exception-detail-title" id="highAmountTitle">审核这笔 ¥68,420.00 的设备采购</h1>
+              <div class="exception-detail-meta">
+                <span class="mono">TASK-2026-07-024</span>
+                <span class="mono">ITEM-021</span>
+                <span>账套人工审核线：¥50,000.00</span>
+              </div>
+            </div>
+          </header>
+
+          <div class="exception-detail-grid">
+            <section class="exception-detail-card" aria-labelledby="highEvidenceTitle">
+              <div class="exception-reason">
+                <strong>为什么置信度高仍需人工审核</strong>
+                <p>本账套规定，单笔金额达到 ¥50,000.00 必须逐笔人工批准。这条风险规则优先于置信度，因此系统没有把该草稿放入批量审核。</p>
+              </div>
+              <h2 id="highEvidenceTitle">原始资料和 AI 判断</h2>
+              <dl class="fact-list">
+                <div class="fact-row"><dt>采购发票</dt><dd>服务器与显示器 · DOC-EQUIP-0719 · ¥68,420.00</dd><span class="fact-confidence">识别 99%</span></div>
+                <div class="fact-row"><dt>匹配流水</dt><dd>招商银行 · 2026-07-21 · ¥68,420.00</dd><span class="fact-confidence">匹配 96%</span></div>
+                <div class="fact-row"><dt>凭证草稿</dt><dd>借：固定资产—电子设备　贷：银行存款</dd><span class="fact-confidence">推荐 93%</span></div>
+                <div class="fact-row"><dt>推荐依据</dt><dd>发票商品为服务器和显示器；金额、日期与流水一致</dd><span class="fact-confidence">VoucherAgent</span></div>
+              </dl>
+            </section>
+
+            <form class="exception-detail-card exception-action" id="highAmountForm" aria-labelledby="highActionTitle">
+              <h2 id="highActionTitle">逐笔批准前确认</h2>
+              <div class="risk-checks">
+                <label class="risk-check"><input type="checkbox" id="highMatchCheck"><span>我已核对发票和银行流水，确认属于同一笔采购。</span></label>
+                <label class="risk-check"><input type="checkbox" id="highVoucherCheck"><span>我已核对金额和会计科目，确认凭证草稿无误。</span></label>
+              </div>
+              <div class="exception-impact">批准后，这份草稿进入“已批准待导出”。正式入账仍由会计在外部记账系统完成。</div>
+              <p class="exception-action-status" id="highAmountStatus" aria-live="polite">完成两项核对后才能批准。</p>
+              <button class="button button-primary" type="submit" id="highAmountButton" disabled>批准这份高金额草稿</button>
+              <div class="exception-record" id="highAmountRecord" hidden></div>
+            </form>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -1852,7 +1849,12 @@
     const statusIndicator = document.querySelector("#statusIndicator");
     const caseStatus = document.querySelector("#caseStatus");
     const processCurrent = document.querySelector("#processCurrent");
+    const processExplanation = document.querySelector("#processExplanation");
+    const sharedPendingCount = document.querySelector("#sharedPendingCount");
+    const queueSummary = document.querySelector("#queueSummary");
+    const exceptionQueueItems = Array.from(document.querySelectorAll("[data-exception-route]"));
     const auditList = document.querySelector("#auditList");
+    const documentNode = document.querySelector('[data-agent="document"]');
     const matchingNode = document.querySelector('[data-agent="matching"]');
     const voucherNode = document.querySelector('[data-agent="voucher"]');
     const humanNode = document.querySelector('[data-agent="human"]');
@@ -2037,6 +2039,8 @@
 
       if (typeof updateReviewScope === "function") updateReviewScope();
       if (typeof updateCompleteView === "function") updateCompleteView();
+      const currentExceptionRoute = getExceptionRouteFromHash();
+      if (currentExceptionRoute) renderExceptionWorkbench(currentExceptionRoute);
     }
 
     function syncConflictTaskState(stage) {
@@ -2054,6 +2058,58 @@
       node.classList.remove("is-active", "is-complete");
       if (state) node.classList.add(state);
       node.querySelector(".agent-state").textContent = copy;
+    }
+
+    function getExceptionRouteFromHash() {
+      const route = window.location.hash.replace(/^#/, "").split("/")[0];
+      return route === "conflict" ? "conflict" : route === "low-confidence" ? "lowConfidence" : route === "high-amount" ? "highAmount" : null;
+    }
+
+    function renderExceptionWorkbench(activeRoute) {
+      const routeOrder = { conflict: 1, lowConfidence: 2, highAmount: 3 };
+      const currentPosition = routeOrder[activeRoute];
+      const counts = getTaskCounts();
+      queueSummary.textContent = `共 3 项，当前处理第 ${currentPosition} 项`;
+      sharedPendingCount.textContent = `${counts.manual + counts.confirm} 项`;
+
+      exceptionQueueItems.forEach((item) => {
+        const isCurrent = item.dataset.exceptionRoute === activeRoute;
+        const link = item.querySelector(".queue-item-link");
+        item.classList.toggle("is-current", isCurrent);
+        if (isCurrent) link.setAttribute("aria-current", "page");
+        else link.removeAttribute("aria-current");
+      });
+
+      setAgentState(documentNode, "is-complete", "已完成 · 23 项资料");
+      if (activeRoute === "lowConfidence") {
+        processCurrent.textContent = "当前：第 2 / 3 项 · 科目确认";
+        processExplanation.textContent = "资料识别和流水匹配已经完成；由于业务用途不明确，需要会计选择科目，再由审核人员批准新草稿。";
+        setAgentState(matchingNode, "is-complete", "已完成 · 匹配 93%");
+        setAgentState(voucherNode, "is-complete", "已完成 · 科目推荐 57%");
+        setAgentState(humanNode, workflowState.lowConfidence === "approved" ? "is-complete" : "is-active", workflowState.lowConfidence === "approved" ? "已批准待导出" : workflowState.lowConfidence === "draft-ready" ? "新草稿等待审核" : "当前步骤 · 请选择科目");
+        return;
+      }
+
+      if (activeRoute === "highAmount") {
+        processCurrent.textContent = "当前：第 3 / 3 项 · 高金额审核";
+        processExplanation.textContent = "资料、流水和凭证草稿都已完成；该笔金额超过账套审核线，因此必须由审核人员逐笔批准。";
+        setAgentState(matchingNode, "is-complete", "已完成 · 匹配 96%");
+        setAgentState(voucherNode, "is-complete", "已完成 · 科目推荐 93%");
+        setAgentState(humanNode, workflowState.highAmount === "approved" ? "is-complete" : "is-active", workflowState.highAmount === "approved" ? "已批准待导出" : "当前步骤 · 逐笔审核");
+        return;
+      }
+
+      processCurrent.textContent = workflowState.conflict === "initial" ? "当前：第 1 / 3 项 · 金额确认" : "当前：第 1 / 3 项 · 新草稿审核";
+      processExplanation.textContent = "AI 已识别到发票与流水金额冲突；会计确认正确金额后，系统会重新匹配并生成新草稿。";
+      if (workflowState.conflict === "initial") {
+        setAgentState(matchingNode, "is-complete", "已暂停 · 发现 1 项金额冲突");
+        setAgentState(voucherNode, "", "未开始 · 等待金额确认");
+        setAgentState(humanNode, "is-active", "当前步骤 · 请确认正确金额");
+      } else {
+        setAgentState(matchingNode, "is-complete", "已完成 · 新匹配 96%");
+        setAgentState(voucherNode, "is-complete", "已完成 · 已生成新草稿");
+        setAgentState(humanNode, workflowState.conflict === "approved" ? "is-complete" : "is-active", workflowState.conflict === "approved" ? "已批准待导出" : "新草稿等待审核");
+      }
     }
 
     function appendAudit(actor, copy) {
@@ -2457,13 +2513,17 @@
       workbench: document.querySelector("#workbenchView"),
       create: document.querySelector("#createView"),
       task: document.querySelector("#taskView"),
-      lowConfidence: document.querySelector("#lowConfidenceView"),
-      highAmount: document.querySelector("#highAmountView"),
       conflictReview: document.querySelector("#conflictReviewView"),
       review: document.querySelector("#reviewView"),
       complete: document.querySelector("#completeView"),
-      conflict: document.querySelector("#conflictView")
+      exceptionWorkbench: document.querySelector("#conflictView")
     };
+    const exceptionDetailViews = {
+      conflict: document.querySelector("#conflictDecisionView"),
+      lowConfidence: document.querySelector("#lowConfidenceView"),
+      highAmount: document.querySelector("#highAmountView")
+    };
+    const exceptionRoutes = new Set(Object.keys(exceptionDetailViews));
     const decisionBar = document.querySelector("#conflictDecisionBar");
 
     function renderRoute() {
@@ -2488,10 +2548,16 @@
           : "workbench";
 
       Object.entries(routeViews).forEach(([name, view]) => {
+        const isActive = name === activeRoute || (name === "exceptionWorkbench" && exceptionRoutes.has(activeRoute));
+        view.hidden = !isActive;
+        view.setAttribute("aria-hidden", String(!isActive));
+      });
+      Object.entries(exceptionDetailViews).forEach(([name, view]) => {
         const isActive = name === activeRoute;
         view.hidden = !isActive;
         view.setAttribute("aria-hidden", String(!isActive));
       });
+      if (exceptionRoutes.has(activeRoute)) renderExceptionWorkbench(activeRoute);
       decisionBar.hidden = activeRoute !== "conflict";
       if (activeRoute === "conflictReview" && conflictWorkflowStage === "initial") {
         syncConflictTaskState("resolved");
