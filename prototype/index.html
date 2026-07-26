@@ -980,6 +980,7 @@
 
     .review-decision { display: grid; gap: var(--space-sm); }
     .decision-callout { padding: var(--space-sm); border-inline-start: 3px solid var(--color-accent); background: var(--color-success-soft); }
+    .decision-callout.is-warning { border-color: var(--color-warning); background: var(--color-warning-soft); }
     .decision-callout strong { display: block; font-size: var(--text-sm); }
     .decision-callout p { margin: var(--space-3xs) 0 0; color: var(--color-ink-soft); font-size: var(--text-xs); }
     .review-checks { display: grid; gap: var(--space-2xs); }
@@ -1005,6 +1006,7 @@
     .complete-stat.is-warning { border-color: var(--color-warning); }
     .complete-stat-label { color: var(--color-muted); font-size: var(--text-xs); }
     .complete-stat-value { display: block; margin-block-start: var(--space-3xs); font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 700; }
+    .complete-card .decision-callout { margin-block-start: var(--space-md); }
     .complete-timeline { display: grid; gap: var(--space-xs); margin: 0; padding: 0; list-style: none; }
     .complete-timeline li { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: var(--space-xs); padding-block-end: var(--space-xs); border-block-end: 1px solid var(--color-rule-soft); font-size: var(--text-xs); }
     .complete-timeline li:last-child { border-block-end: 0; }
@@ -1552,7 +1554,7 @@
 
         <form class="review-card review-decision" id="reviewForm" aria-labelledby="reviewDecisionTitle">
           <h2 id="reviewDecisionTitle">批准前请确认</h2>
-          <div class="decision-callout">
+          <div class="decision-callout is-warning">
             <strong>异常项不会包含在本次批准中</strong>
             <p>金额冲突、低置信度和高金额共 3 项，仍留在人工处理列表中，不能通过批量操作跳过。</p>
           </div>
@@ -1570,8 +1572,8 @@
     <div class="complete-inner">
       <header class="complete-header">
         <div>
-          <p class="section-kicker">云帆科技（上海）有限公司 · 导出结果</p>
-          <h1 class="complete-title" id="completeTitle">18 份已批准凭证已导出</h1>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 本次导出结果</p>
+          <h1 class="complete-title" id="completeTitle">18 份无异常凭证已导出，任务仍在进行</h1>
           <div class="complete-meta">
             <span class="mono">TASK-2026-07-024</span>
             <span class="mono">EXPORT-20260726-01</span>
@@ -1588,10 +1590,14 @@
         <section class="complete-card" aria-labelledby="resultSummaryTitle">
           <div class="complete-mark" aria-hidden="true">✓</div>
           <h2 id="resultSummaryTitle">本次批量审核与导出已完成</h2>
-          <p>这 18 份凭证已经会计批准并生成导出记录。下一步由会计在外部记账系统中导入或录入；AI 没有写入正式账簿。</p>
+          <p>这 18 份凭证已经人工批准并生成导出记录。这里完成的是“无异常凭证的批量处理”，不是整项记账任务。AI 没有写入正式账簿。</p>
           <div class="complete-stats">
             <div class="complete-stat"><span class="complete-stat-label">已批准并导出</span><strong class="complete-stat-value">18</strong></div>
             <div class="complete-stat is-warning"><span class="complete-stat-label">仍待人工处理</span><strong class="complete-stat-value">3</strong></div>
+          </div>
+          <div class="decision-callout is-warning">
+            <strong>整项任务何时才算完成</strong>
+            <p>剩余 3 项异常全部完成或终止，且它们产生的已批准凭证全部导出后，任务状态才会变为“已完成”。</p>
           </div>
         </section>
 
@@ -1604,7 +1610,7 @@
           </ol>
         </section>
       </div>
-      <p class="complete-note">本月任务还没有全部结束：3 项异常仍需逐项处理。已经导出的 18 份凭证不受影响。</p>
+      <p class="complete-note">当前任务状态：待人工处理。3 项异常仍需逐项处理；已经导出的 18 份凭证不受影响。</p>
     </div>
   </section>
 
