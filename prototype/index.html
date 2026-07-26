@@ -358,6 +358,8 @@
       font-weight: 700;
     }
 
+    .risk-label.is-batch { color: var(--color-accent-hover); }
+
     .queue-title {
       margin: var(--space-xs) 0 var(--space-2xs);
       font-size: var(--text-md);
@@ -813,7 +815,7 @@
     .task-progress { display: grid; gap: var(--space-xs); }
     .progress-line { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); font-size: var(--text-sm); }
     .progress-track { height: 0.45rem; background: var(--color-rule-soft); }
-    .progress-fill { width: 86%; height: 100%; background: var(--color-accent); }
+    .progress-fill { width: 100%; height: 100%; background: var(--color-accent); }
     .task-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); margin-block-start: var(--space-md); }
     .task-stat { padding: var(--space-sm); border-block-start: 2px solid var(--color-rule); background: var(--color-paper); }
     .task-stat.is-warning { border-color: var(--color-warning); }
@@ -954,6 +956,11 @@
       gap: var(--space-md);
       margin-block-start: var(--space-md);
     }
+
+    .review-layout.is-export-only { grid-template-columns: minmax(0, 1fr); }
+    .review-summary-card[hidden],
+    .review-card[hidden],
+    .review-check[hidden] { display: none; }
 
     .review-card {
       min-width: 0;
@@ -1294,7 +1301,7 @@
           <div class="task-steps">
             <div class="task-step is-done"><span class="step-number">1</span><div><div class="task-step-title">识别并整理资料</div><div class="task-step-note">DocumentAgent · 已识别 23 项资料</div></div><span class="step-status">已完成</span></div>
             <div class="task-step is-done"><span class="step-number">2</span><div><div class="task-step-title">匹配银行流水</div><div class="task-step-note" id="taskMatchingNote">MatchingAgent · 正常项已完成，发现 1 项金额冲突</div></div><span class="step-status" id="taskMatchingStatus">正常项已完成</span></div>
-            <div class="task-step"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 已生成 18 份草稿，异常项等待处理</div></div><span class="step-status" id="taskVoucherStatus">已生成 18 份</span></div>
+            <div class="task-step"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 21 个处理项中已有 19 份形成草稿，另 2 项待人工确认后生成</div></div><span class="step-status" id="taskVoucherStatus">已生成 19 份</span></div>
             <div class="task-step"><span class="step-number">4</span><div><div class="task-step-title">人工审核并导出</div><div class="task-step-note">所有草稿必须经过人工批准；AI 不会写入正式账簿</div></div><span class="step-status" id="taskReviewStatus">等待人工审核</span></div>
           </div>
         </section>
@@ -1302,8 +1309,8 @@
         <section class="task-card" aria-labelledby="progressCardTitle">
           <h2 id="progressCardTitle">处理结果概览</h2>
           <div class="task-progress">
-            <div class="progress-line"><span id="taskProgressCopy">AI 已识别 23 份资料并形成 21 个处理项，其中 18 项可以进入批量审核</span><strong class="mono" id="taskProgressValue">18 / 21 项</strong></div>
-            <div class="progress-track" id="taskProgressTrack" aria-label="任务处理进度 86%"><div class="progress-fill" id="taskProgressFill"></div></div>
+            <div class="progress-line"><span id="taskProgressCopy">21 个处理项已完成分流：18 项进入批量审核，3 项进入逐项处理</span><strong class="mono" id="taskProgressValue">21 / 21 项</strong></div>
+            <div class="progress-track" id="taskProgressTrack" aria-label="处理项分流进度 100%"><div class="progress-fill" id="taskProgressFill"></div></div>
           </div>
           <div class="task-stats">
             <div class="task-stat"><span class="task-stat-label" id="taskBatchLabel">待批量审核</span><strong class="task-stat-value" id="taskBatchCount">18</strong></div>
@@ -1327,11 +1334,11 @@
     </div>
   </section>
 
-  <section class="page-view exception-detail-shell" id="conflictReviewView" aria-labelledby="conflictReviewTitle" hidden>
+  <section class="decision-canvas exception-workbench-canvas" id="conflictReviewView" aria-labelledby="conflictReviewTitle" hidden>
     <div class="exception-detail-inner">
       <header class="exception-detail-header">
         <div>
-          <p class="section-kicker">云帆科技（上海）有限公司 · 金额冲突已处理</p>
+          <p class="section-kicker">第 2 / 4 组 · 金额冲突已处理</p>
           <h1 class="exception-detail-title" id="conflictReviewTitle">审核重新生成的云服务年费凭证草稿</h1>
           <div class="exception-detail-meta">
             <span class="mono">TASK-2026-07-024</span>
@@ -1339,7 +1346,6 @@
             <span>人工确认金额：¥68,420.00</span>
           </div>
         </div>
-        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
       </header>
 
       <div class="exception-detail-grid">
@@ -1373,11 +1379,11 @@
     </div>
   </section>
 
-  <section class="page-view review-shell" id="reviewView" aria-labelledby="reviewTitle" hidden>
+  <section class="decision-canvas exception-workbench-canvas" id="reviewView" aria-labelledby="reviewTitle" hidden>
     <div class="review-inner">
       <header class="review-header">
         <div>
-          <p class="section-kicker">云帆科技（上海）有限公司 · 批量审核</p>
+          <p class="section-kicker">第 1 / 4 组 · 批量审核</p>
           <h1 class="review-title" id="reviewTitle">批量审核 18 份凭证草稿</h1>
           <div class="review-meta">
             <span class="mono">TASK-2026-07-024</span>
@@ -1385,24 +1391,21 @@
             <span id="reviewExcludedMeta">金额冲突、低置信度和高金额共 3 项，不在本次批量审核范围内</span>
           </div>
         </div>
-        <div class="review-actions">
-          <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
-        </div>
       </header>
 
       <section class="review-summary" aria-label="本次批量审核范围">
         <div class="review-summary-card is-primary">
           <span class="review-summary-label">本次操作范围</span>
           <strong class="review-summary-value" id="reviewScopeValue">18 份草稿</strong>
-          <p class="review-summary-copy">只包含无异常、高置信度草稿。审核人员批准后，才能生成导出文件。</p>
+          <p class="review-summary-copy" id="reviewScopeCopy">只包含无异常、高置信度草稿。审核人员批准后，才能生成导出文件。</p>
         </div>
         <div class="review-summary-card"><span class="review-summary-label">最低识别置信度</span><strong class="review-summary-value">92%</strong></div>
         <div class="review-summary-card"><span class="review-summary-label">最低匹配置信度</span><strong class="review-summary-value">90%</strong></div>
         <div class="review-summary-card"><span class="review-summary-label">最低科目置信度</span><strong class="review-summary-value">88%</strong></div>
       </section>
 
-      <div class="review-layout">
-        <section class="review-card" aria-labelledby="draftsTitle">
+      <div class="review-layout" id="reviewLayout">
+        <section class="review-card" id="reviewDraftsCard" aria-labelledby="draftsTitle">
           <h2 id="draftsTitle">查看草稿和 AI 判断依据</h2>
           <p class="review-help" id="reviewHelp">第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。</p>
           <ul class="draft-list">
@@ -1502,7 +1505,7 @@
           </div>
         </div>
         <div class="complete-actions">
-          <a class="button" href="#task/TASK-2026-07-024">查看剩余待处理项</a>
+          <a class="button" href="#task/TASK-2026-07-024" id="completeTaskAction">查看剩余待处理项</a>
           <a class="button button-primary" href="#workbench">返回客户工作台</a>
         </div>
       </header>
@@ -1551,8 +1554,8 @@
           <span class="context-value mono">23 项</span>
         </div>
         <div class="context-fact">
-          <span class="context-label">待人工确认</span>
-          <span class="context-value mono" id="sharedPendingCount">3 项</span>
+          <span class="context-label">人工工作列表</span>
+          <span class="context-value mono" id="sharedPendingCount">4 组</span>
         </div>
       </div>
     </header>
@@ -1560,8 +1563,8 @@
     <section class="process-section" aria-labelledby="processTitle">
       <div class="process-guide">
         <div class="process-guide-copy">
-          <h2 class="process-title" id="processTitle">本批资料处理进度</h2>
-          <p class="process-explanation" id="processExplanation">AI 会先识别资料、匹配银行流水，再生成凭证草稿；遇到冲突时交给会计确认。</p>
+          <h2 class="process-title" id="processTitle">整批状态与当前待办</h2>
+          <p class="process-explanation" id="processExplanation">整批已有 18 份无异常草稿可审核；当前金额冲突项尚未生成草稿。</p>
         </div>
         <span class="process-current" id="processCurrent">当前：第 4 步</span>
       </div>
@@ -1571,7 +1574,7 @@
           <div class="agent-copy">
             <div class="agent-name">识别并整理资料</div>
             <div class="agent-role">DocumentAgent</div>
-            <div class="agent-state">已完成 · 23 项资料</div>
+            <div class="agent-state">整批已完成 · 23 份资料</div>
           </div>
         </div>
         <div class="agent-node is-complete" data-agent="matching">
@@ -1579,7 +1582,7 @@
           <div class="agent-copy">
             <div class="agent-name">匹配银行流水</div>
             <div class="agent-role">MatchingAgent</div>
-            <div class="agent-state">已暂停 · 发现 1 项金额冲突</div>
+            <div class="agent-state">正常项已完成 · 当前项暂停</div>
           </div>
         </div>
         <div class="agent-node" data-agent="voucher">
@@ -1587,13 +1590,13 @@
           <div class="agent-copy">
             <div class="agent-name">生成凭证草稿</div>
             <div class="agent-role">VoucherAgent</div>
-            <div class="agent-state">未开始 · 等待金额确认</div>
+            <div class="agent-state">已生成 18 份 · 当前项尚未生成</div>
           </div>
         </div>
         <div class="agent-node is-active" data-agent="human">
           <span class="agent-index" aria-hidden="true">4</span>
           <div class="agent-copy">
-            <div class="agent-name">会计确认异常</div>
+            <div class="agent-name">人工审核与处理</div>
             <div class="agent-role">人工处理</div>
             <div class="agent-state">正在处理 · 请确认正确金额</div>
           </div>
@@ -1602,38 +1605,48 @@
     </section>
 
     <main class="workbench">
-      <aside class="decision-queue" aria-label="需要会计处理的项目">
-        <h2 class="queue-heading">需要会计处理</h2>
-        <p class="queue-summary" id="queueSummary">共 3 项，当前处理第 1 项</p>
+      <aside class="decision-queue" aria-label="人工审核与处理工作列表">
+        <h2 class="queue-heading">人工审核与处理</h2>
+        <p class="queue-summary" id="queueSummary">1 组批量审核，3 个逐项处理</p>
         <ol class="queue-list">
-          <li class="queue-item is-current" data-exception-route="conflict">
-            <a class="queue-item-link" href="#conflict/ITEM-009" aria-current="page">
+          <li class="queue-item" data-work-route="review">
+            <a class="queue-item-link" href="#review/TASK-2026-07-024" id="queueBatchLink">
               <div class="queue-item-head">
-                <span class="risk-label">金额冲突</span>
-                <span class="mono">1 / 3</span>
+                <span class="risk-label is-batch" id="queueBatchLabel">批量审核</span>
+                <span class="mono">1 / 4</span>
+              </div>
+              <h3 class="queue-title" id="queueBatchTitle">18 份无异常草稿</h3>
+              <p class="queue-detail" id="queueBatchDetail">均达到 85% 阈值，可一次审核</p>
+            </a>
+          </li>
+          <li class="queue-item is-current" data-work-route="conflict">
+            <a class="queue-item-link" href="#conflict/ITEM-009" id="queueConflictLink" aria-current="page">
+              <div class="queue-item-head">
+                <span class="risk-label" id="queueConflictLabel">金额冲突</span>
+                <span class="mono">2 / 4</span>
               </div>
               <h3 class="queue-title">上海恒际云服务有限公司</h3>
-              <p class="queue-detail">发票与银行流水相差 ¥200.00</p>
+              <p class="queue-detail" id="queueConflictDetail">发票与银行流水相差 ¥200.00</p>
             </a>
           </li>
-          <li class="queue-item" data-exception-route="lowConfidence">
+          <li class="queue-item" data-work-route="lowConfidence">
             <a class="queue-item-link" href="#low-confidence/ITEM-014">
               <div class="queue-item-head">
-                <span class="risk-label">低置信度</span>
-                <span class="mono">2 / 3</span>
+                <span class="risk-label" id="queueLowLabel">低置信度</span>
+                <span class="mono">3 / 4</span>
               </div>
               <h3 class="queue-title">差旅费报销单</h3>
-              <p class="queue-detail">科目推荐置信度 57%</p>
+              <p class="queue-detail" id="queueLowDetail">科目推荐置信度 57%</p>
             </a>
           </li>
-          <li class="queue-item" data-exception-route="highAmount">
+          <li class="queue-item" data-work-route="highAmount">
             <a class="queue-item-link" href="#high-amount/ITEM-021">
               <div class="queue-item-head">
-                <span class="risk-label">高金额</span>
-                <span class="mono">3 / 3</span>
+                <span class="risk-label" id="queueHighLabel">高金额</span>
+                <span class="mono">4 / 4</span>
               </div>
               <h3 class="queue-title">设备采购发票</h3>
-              <p class="queue-detail">单笔金额 ¥68,420.00</p>
+              <p class="queue-detail" id="queueHighDetail">单笔金额 ¥68,420.00</p>
             </a>
           </li>
         </ol>
@@ -1721,7 +1734,7 @@
         <div class="exception-detail-inner">
           <header class="exception-detail-header">
             <div>
-              <p class="section-kicker">第 2 / 3 项 · 低置信度</p>
+              <p class="section-kicker">第 3 / 4 组 · 低置信度</p>
               <h1 class="exception-detail-title" id="lowConfidenceTitle">为这张差旅费报销单选择正确科目</h1>
               <div class="exception-detail-meta">
                 <span class="mono">TASK-2026-07-024</span>
@@ -1777,7 +1790,7 @@
         <div class="exception-detail-inner">
           <header class="exception-detail-header">
             <div>
-              <p class="section-kicker">第 3 / 3 项 · 高金额</p>
+              <p class="section-kicker">第 4 / 4 组 · 高金额</p>
               <h1 class="exception-detail-title" id="highAmountTitle">审核这笔 ¥68,420.00 的设备采购</h1>
               <div class="exception-detail-meta">
                 <span class="mono">TASK-2026-07-024</span>
@@ -1852,12 +1865,24 @@
     const processExplanation = document.querySelector("#processExplanation");
     const sharedPendingCount = document.querySelector("#sharedPendingCount");
     const queueSummary = document.querySelector("#queueSummary");
-    const exceptionQueueItems = Array.from(document.querySelectorAll("[data-exception-route]"));
+    const workQueueItems = Array.from(document.querySelectorAll("[data-work-route]"));
+    const queueBatchLabel = document.querySelector("#queueBatchLabel");
+    const queueBatchTitle = document.querySelector("#queueBatchTitle");
+    const queueBatchDetail = document.querySelector("#queueBatchDetail");
+    const queueConflictLink = document.querySelector("#queueConflictLink");
+    const queueConflictLabel = document.querySelector("#queueConflictLabel");
+    const queueConflictDetail = document.querySelector("#queueConflictDetail");
+    const queueLowLabel = document.querySelector("#queueLowLabel");
+    const queueLowDetail = document.querySelector("#queueLowDetail");
+    const queueHighLabel = document.querySelector("#queueHighLabel");
+    const queueHighDetail = document.querySelector("#queueHighDetail");
     const auditList = document.querySelector("#auditList");
     const documentNode = document.querySelector('[data-agent="document"]');
     const matchingNode = document.querySelector('[data-agent="matching"]');
     const voucherNode = document.querySelector('[data-agent="voucher"]');
     const humanNode = document.querySelector('[data-agent="human"]');
+    const humanNodeName = humanNode.querySelector(".agent-name");
+    const humanNodeRole = humanNode.querySelector(".agent-role");
     const initialAudit = auditList.innerHTML;
     const taskTitleElement = document.querySelector("#taskTitle");
     const taskUpdated = document.querySelector("#taskUpdated");
@@ -1891,9 +1916,11 @@
     const taskConflictCopy = document.querySelector("#taskConflictCopy");
     const taskConflictState = document.querySelector("#taskConflictState");
     const taskLowConfidenceLabel = document.querySelector("#taskLowConfidenceLabel");
+    const taskLowConfidenceLink = document.querySelector("#taskLowConfidenceLink");
     const taskLowConfidenceCopy = document.querySelector("#taskLowConfidenceCopy");
     const taskLowConfidenceState = document.querySelector("#taskLowConfidenceState");
     const taskHighAmountLabel = document.querySelector("#taskHighAmountLabel");
+    const taskHighAmountLink = document.querySelector("#taskHighAmountLink");
     const taskHighAmountCopy = document.querySelector("#taskHighAmountCopy");
     const taskHighAmountState = document.querySelector("#taskHighAmountState");
     const workflowState = {
@@ -1914,22 +1941,43 @@
       let approvedPendingExport = 0;
       if (workflowState.conflict === "initial") manual += 1;
       else if (workflowState.conflict === "resolved") confirm += 1;
-      else approvedPendingExport += 1;
+      else if (workflowState.conflict === "approved") approvedPendingExport += 1;
       if (workflowState.lowConfidence === "initial") manual += 1;
       else if (workflowState.lowConfidence === "draft-ready") confirm += 1;
-      else approvedPendingExport += 1;
+      else if (workflowState.lowConfidence === "approved") approvedPendingExport += 1;
       if (workflowState.highAmount === "initial") manual += 1;
-      else approvedPendingExport += 1;
+      else if (workflowState.highAmount === "approved") approvedPendingExport += 1;
       if (workflowState.batchExcludedState === "review") confirm += 1;
       if (workflowState.batchExcludedState === "redo") manual += 1;
       return { confirm, manual, approvedPendingExport };
     }
 
+    function getApprovedExceptionCount() {
+      return ["conflict", "lowConfidence", "highAmount"]
+        .filter((key) => workflowState[key] === "approved").length;
+    }
+
+    function getExportedExceptionCount() {
+      return ["conflict", "lowConfidence", "highAmount"]
+        .filter((key) => workflowState[key] === "exported").length;
+    }
+
+    function getGeneratedDraftCount() {
+      let count = workflowState.batchSize + 1;
+      if (workflowState.conflict !== "initial") count += 1;
+      if (workflowState.lowConfidence !== "initial") count += 1;
+      return count;
+    }
+
     function updateTaskState() {
       const batchCount = workflowState.batchSize - (workflowState.batchExcludedState ? 1 : 0);
       const counts = getTaskCounts();
+      const generatedDraftCount = getGeneratedDraftCount();
+      const pendingDraftCount = 21 - generatedDraftCount;
+      const taskDone = workflowState.batchExported && counts.confirm === 0 && counts.manual === 0 && counts.approvedPendingExport === 0;
       const titleParts = [];
-      if (workflowState.batchExported) titleParts.push(`${batchCount} 份无异常凭证已导出`);
+      if (taskDone) titleParts.push(`${batchCount + getExportedExceptionCount()} 份凭证已导出，任务已完成`);
+      else if (workflowState.batchExported) titleParts.push(`${batchCount} 份无异常凭证已导出`);
       else if (workflowState.batchApproved) titleParts.push(`${batchCount} 份草稿已批准待导出`);
       else titleParts.push(`${batchCount} 份草稿待批量审核`);
       if (counts.confirm) titleParts.push(`${counts.confirm} 份草稿待审核`);
@@ -1941,6 +1989,10 @@
       taskManualCount.textContent = String(counts.manual);
       workbenchConfirmCount.textContent = String(counts.confirm);
       workbenchManualCount.textContent = String(counts.manual);
+      taskVoucherNote.textContent = pendingDraftCount
+        ? `VoucherAgent · 21 个处理项中已有 ${generatedDraftCount} 份形成草稿，另 ${pendingDraftCount} 项待人工确认后生成`
+        : "VoucherAgent · 21 个处理项均已形成草稿，按批量或逐项路径完成人工审核";
+      taskVoucherStatus.textContent = `已生成 ${generatedDraftCount} 份`;
 
       const batchLabel = workflowState.batchExported ? "已批量导出" : workflowState.batchApproved ? "已批准待导出" : "待批量审核";
       taskBatchLabel.textContent = batchLabel;
@@ -1988,59 +2040,71 @@
         taskConflictState.textContent = "去处理 →";
         taskMatchingNote.textContent = "MatchingAgent · 正常项已完成，发现 1 项金额冲突";
         taskMatchingStatus.textContent = "正常项已完成";
-        taskVoucherNote.textContent = "VoucherAgent · 已生成 18 份草稿，异常项等待处理";
-        taskVoucherStatus.textContent = "已生成 18 份";
-        taskProgressCopy.textContent = `AI 已识别 23 份资料并形成 21 个处理项，其中 ${batchCount} 项可以进入批量审核`;
-        taskProgressValue.textContent = "18 / 21 项";
-        taskProgressTrack.setAttribute("aria-label", "任务处理进度 86%");
-        taskProgressFill.style.width = "86%";
+        taskProgressCopy.textContent = `21 个处理项已完成分流：${batchCount} 项进入批量审核，3 项进入逐项处理`;
+        taskProgressValue.textContent = "21 / 21 项";
+        taskProgressTrack.setAttribute("aria-label", "处理项分流进度 100%");
+        taskProgressFill.style.width = "100%";
       } else {
         taskConflictLink.setAttribute("href", "#conflict-review/ITEM-009");
         taskMatchingNote.textContent = "MatchingAgent · 金额冲突已解除，新匹配置信度 96%";
         taskMatchingStatus.textContent = "已重新匹配";
-        taskVoucherNote.textContent = workflowState.conflict === "approved"
-          ? "VoucherAgent · 冲突项已生成新草稿并通过人工审核"
-          : "VoucherAgent · 冲突项已生成新草稿，等待逐笔审核";
-        taskVoucherStatus.textContent = workflowState.conflict === "approved" ? "1 份已批准" : "已生成 19 份";
-        taskProgressCopy.textContent = "金额冲突项已重新匹配并生成新草稿，当前有 19 个处理项形成草稿";
-        taskProgressValue.textContent = "19 / 21 项";
-        taskProgressTrack.setAttribute("aria-label", "任务处理进度 90%");
-        taskProgressFill.style.width = "90%";
-        taskConflictLabel.textContent = workflowState.conflict === "approved" ? "已批准待导出" : "待审核";
-        taskConflictCopy.textContent = workflowState.conflict === "approved"
-          ? "人工确认金额后已重新匹配，新草稿已由审核人员批准"
-          : "金额已确认并生成新草稿，需审核人员逐笔批准";
-        taskConflictState.textContent = workflowState.conflict === "approved" ? "查看结果 →" : "去审核 →";
+        taskProgressCopy.textContent = `21 个处理项已完成分流：${batchCount} 项批量审核，金额冲突项已生成新草稿，其余异常项继续逐项处理`;
+        taskProgressValue.textContent = "21 / 21 项";
+        taskProgressTrack.setAttribute("aria-label", "处理项分流进度 100%");
+        taskProgressFill.style.width = "100%";
+        taskConflictLabel.textContent = workflowState.conflict === "resolved" ? "待审核" : workflowState.conflict === "approved" ? "已批准待导出" : "已完成";
+        taskConflictCopy.textContent = workflowState.conflict === "resolved"
+          ? "金额已确认并生成新草稿，需审核人员逐笔批准"
+          : workflowState.conflict === "approved"
+            ? "人工确认金额后已重新匹配，新草稿已由审核人员批准"
+            : "新草稿已批准并生成导出记录";
+        taskConflictLink.setAttribute("href", workflowState.conflict === "approved" ? "#review/TASK-2026-07-024" : "#conflict-review/ITEM-009");
+        taskConflictState.textContent = workflowState.conflict === "resolved" ? "去审核 →" : workflowState.conflict === "approved" ? "去导出 →" : "查看结果 →";
       }
 
       if (workflowState.lowConfidence === "initial") {
+        taskLowConfidenceLink.setAttribute("href", "#low-confidence/ITEM-014");
         taskLowConfidenceLabel.textContent = "低置信度";
         taskLowConfidenceCopy.textContent = "科目推荐置信度 57%，需会计选择";
         taskLowConfidenceState.textContent = "去处理 →";
       } else if (workflowState.lowConfidence === "draft-ready") {
+        taskLowConfidenceLink.setAttribute("href", "#low-confidence/ITEM-014");
         taskLowConfidenceLabel.textContent = "待审核";
         taskLowConfidenceCopy.textContent = "会计已选择科目并生成新草稿，需审核人员批准";
         taskLowConfidenceState.textContent = "去审核 →";
-      } else {
+      } else if (workflowState.lowConfidence === "approved") {
+        taskLowConfidenceLink.setAttribute("href", "#review/TASK-2026-07-024");
         taskLowConfidenceLabel.textContent = "已批准待导出";
         taskLowConfidenceCopy.textContent = "人工选择的科目和新草稿已由审核人员批准";
+        taskLowConfidenceState.textContent = "去导出 →";
+      } else {
+        taskLowConfidenceLink.setAttribute("href", "#low-confidence/ITEM-014");
+        taskLowConfidenceLabel.textContent = "已完成";
+        taskLowConfidenceCopy.textContent = "人工选择的科目和新草稿已批准并导出";
         taskLowConfidenceState.textContent = "查看结果 →";
       }
 
       if (workflowState.highAmount === "initial") {
+        taskHighAmountLink.setAttribute("href", "#high-amount/ITEM-021");
         taskHighAmountLabel.textContent = "高金额";
         taskHighAmountCopy.textContent = "单笔 ¥68,420.00，按规则必须人工审核";
         taskHighAmountState.textContent = "去处理 →";
-      } else {
+      } else if (workflowState.highAmount === "approved") {
+        taskHighAmountLink.setAttribute("href", "#review/TASK-2026-07-024");
         taskHighAmountLabel.textContent = "已批准待导出";
         taskHighAmountCopy.textContent = "高金额草稿已由审核人员逐笔批准";
+        taskHighAmountState.textContent = "去导出 →";
+      } else {
+        taskHighAmountLink.setAttribute("href", "#high-amount/ITEM-021");
+        taskHighAmountLabel.textContent = "已完成";
+        taskHighAmountCopy.textContent = "高金额草稿已逐笔批准并导出";
         taskHighAmountState.textContent = "查看结果 →";
       }
 
       if (typeof updateReviewScope === "function") updateReviewScope();
       if (typeof updateCompleteView === "function") updateCompleteView();
-      const currentExceptionRoute = getExceptionRouteFromHash();
-      if (currentExceptionRoute) renderExceptionWorkbench(currentExceptionRoute);
+      const currentWorkRoute = getWorkRouteFromHash();
+      if (currentWorkRoute) renderReviewWorkbench(currentWorkRoute);
     }
 
     function syncConflictTaskState(stage) {
@@ -2060,55 +2124,149 @@
       node.querySelector(".agent-state").textContent = copy;
     }
 
-    function getExceptionRouteFromHash() {
+    function getWorkRouteFromHash() {
       const route = window.location.hash.replace(/^#/, "").split("/")[0];
-      return route === "conflict" ? "conflict" : route === "low-confidence" ? "lowConfidence" : route === "high-amount" ? "highAmount" : null;
+      return route === "review"
+        ? "review"
+        : route === "conflict"
+          ? "conflict"
+          : route === "conflict-review"
+            ? "conflictReview"
+            : route === "low-confidence"
+              ? "lowConfidence"
+              : route === "high-amount"
+                ? "highAmount"
+                : null;
     }
 
-    function renderExceptionWorkbench(activeRoute) {
-      const routeOrder = { conflict: 1, lowConfidence: 2, highAmount: 3 };
-      const currentPosition = routeOrder[activeRoute];
-      const counts = getTaskCounts();
-      queueSummary.textContent = `共 3 项，当前处理第 ${currentPosition} 项`;
-      sharedPendingCount.textContent = `${counts.manual + counts.confirm} 项`;
+    function renderReviewWorkbench(activeRoute) {
+      const activeGroup = activeRoute === "conflictReview" ? "conflict" : activeRoute;
+      const routeOrder = { review: 1, conflict: 2, lowConfidence: 3, highAmount: 4 };
+      const currentPosition = routeOrder[activeGroup];
+      const batchCount = getBatchCount();
+      const exportableCount = getExportableCount();
 
-      exceptionQueueItems.forEach((item) => {
-        const isCurrent = item.dataset.exceptionRoute === activeRoute;
+      queueSummary.textContent = `1 组批量审核，3 个逐项处理 · 当前第 ${currentPosition} / 4 组`;
+      sharedPendingCount.textContent = "4 组";
+
+      queueBatchTitle.textContent = `${batchCount} 份无异常草稿`;
+      if (workflowState.batchExported && exportableCount > 0) {
+        queueBatchLabel.textContent = "待导出";
+        queueBatchDetail.textContent = `${exportableCount} 份异常草稿已逐项批准，可增量导出`;
+      } else if (workflowState.batchExported) {
+        queueBatchLabel.textContent = "已完成";
+        queueBatchDetail.textContent = "已批准并生成导出记录";
+      } else if (workflowState.batchApproved) {
+        queueBatchLabel.textContent = "待导出";
+        queueBatchDetail.textContent = "批量审核已通过，等待生成导出文件";
+      } else {
+        queueBatchLabel.textContent = "批量审核";
+        queueBatchDetail.textContent = "均达到 85% 阈值，可一次审核";
+      }
+
+      queueConflictLink.setAttribute("href", workflowState.conflict === "initial" ? "#conflict/ITEM-009" : "#conflict-review/ITEM-009");
+      queueConflictLabel.textContent = workflowState.conflict === "initial"
+        ? "金额冲突"
+        : workflowState.conflict === "resolved"
+          ? "待审核"
+          : workflowState.conflict === "approved"
+            ? "待导出"
+            : "已完成";
+      queueConflictDetail.textContent = workflowState.conflict === "initial"
+        ? "发票与银行流水相差 ¥200.00"
+        : workflowState.conflict === "resolved"
+          ? "已重新匹配并生成新草稿"
+          : workflowState.conflict === "approved"
+            ? "新草稿已批准，等待导出"
+            : "新草稿已批准并导出";
+
+      queueLowLabel.textContent = workflowState.lowConfidence === "initial"
+        ? "低置信度"
+        : workflowState.lowConfidence === "draft-ready"
+          ? "待审核"
+          : workflowState.lowConfidence === "approved"
+            ? "待导出"
+            : "已完成";
+      queueLowDetail.textContent = workflowState.lowConfidence === "initial"
+        ? "科目推荐置信度 57%"
+        : workflowState.lowConfidence === "draft-ready"
+          ? "人工已选科目，新草稿待审核"
+          : workflowState.lowConfidence === "approved"
+            ? "新草稿已批准，等待导出"
+            : "新草稿已批准并导出";
+
+      queueHighLabel.textContent = workflowState.highAmount === "initial"
+        ? "高金额"
+        : workflowState.highAmount === "approved"
+          ? "待导出"
+          : "已完成";
+      queueHighDetail.textContent = workflowState.highAmount === "initial"
+        ? "单笔金额 ¥68,420.00"
+        : workflowState.highAmount === "approved"
+          ? "已逐笔批准，等待导出"
+          : "已逐笔批准并导出";
+
+      workQueueItems.forEach((item) => {
+        const isCurrent = item.dataset.workRoute === activeGroup;
         const link = item.querySelector(".queue-item-link");
         item.classList.toggle("is-current", isCurrent);
         if (isCurrent) link.setAttribute("aria-current", "page");
         else link.removeAttribute("aria-current");
       });
 
-      setAgentState(documentNode, "is-complete", "已完成 · 23 项资料");
+      setAgentState(documentNode, "is-complete", "整批已完成 · 23 份资料");
+
+      if (activeRoute === "review") {
+        processCurrent.textContent = `当前：第 1 / 4 组 · ${workflowState.batchExported && exportableCount > 0 ? `增量导出 ${exportableCount} 份异常草稿` : workflowState.batchExported ? "查看批量结果" : workflowState.batchApproved ? "导出已批准凭证" : "批量审核"}`;
+        processExplanation.textContent = workflowState.batchExported && exportableCount > 0
+          ? `${batchCount} 份无异常凭证已经导出；当前只导出已完成逐项审核的 ${exportableCount} 份异常草稿，不会重复导出。`
+          : `${batchCount} 份无异常草稿已与 3 个逐项处理分开；批量操作不会跳过或批准异常项。`;
+        setAgentState(matchingNode, "is-complete", "正常项已完成 · 异常项单独处理");
+        setAgentState(voucherNode, "is-complete", `已生成 ${batchCount} 份可批量审核草稿`);
+        humanNodeName.textContent = "审核并导出凭证";
+        humanNodeRole.textContent = "审核人员 / 会计";
+        setAgentState(humanNode, workflowState.batchExported && exportableCount === 0 ? "is-complete" : "is-active", workflowState.batchExported && exportableCount > 0 ? `当前步骤 · 增量导出 ${exportableCount} 份异常草稿` : workflowState.batchExported ? "本组已批准并导出" : workflowState.batchApproved ? "当前步骤 · 导出已批准凭证" : `当前步骤 · 审核 ${batchCount} 份草稿`);
+        return;
+      }
+
       if (activeRoute === "lowConfidence") {
-        processCurrent.textContent = "当前：第 2 / 3 项 · 科目确认";
-        processExplanation.textContent = "资料识别和流水匹配已经完成；由于业务用途不明确，需要会计选择科目，再由审核人员批准新草稿。";
-        setAgentState(matchingNode, "is-complete", "已完成 · 匹配 93%");
-        setAgentState(voucherNode, "is-complete", "已完成 · 科目推荐 57%");
-        setAgentState(humanNode, workflowState.lowConfidence === "approved" ? "is-complete" : "is-active", workflowState.lowConfidence === "approved" ? "已批准待导出" : workflowState.lowConfidence === "draft-ready" ? "新草稿等待审核" : "当前步骤 · 请选择科目");
+        processCurrent.textContent = "当前：第 3 / 4 组 · 科目确认与审核";
+        processExplanation.textContent = "整批已有 18 份无异常草稿；当前项匹配已完成，但科目推荐仅 57%，需要人工选择后再审核新草稿。";
+        setAgentState(matchingNode, "is-complete", "正常项已完成 · 当前项匹配 93%");
+        setAgentState(voucherNode, "is-complete", "已生成 18 份 · 当前项科目待确认");
+        humanNodeName.textContent = workflowState.lowConfidence === "initial" ? "会计选择科目" : "审核新草稿";
+        humanNodeRole.textContent = workflowState.lowConfidence === "initial" ? "记账会计" : "审核人员";
+        setAgentState(humanNode, workflowState.lowConfidence === "exported" ? "is-complete" : "is-active", workflowState.lowConfidence === "exported" ? "当前项已批准并导出" : workflowState.lowConfidence === "approved" ? "当前项已批准待导出" : workflowState.lowConfidence === "draft-ready" ? "当前步骤 · 审核新草稿" : "当前步骤 · 请选择科目");
         return;
       }
 
       if (activeRoute === "highAmount") {
-        processCurrent.textContent = "当前：第 3 / 3 项 · 高金额审核";
-        processExplanation.textContent = "资料、流水和凭证草稿都已完成；该笔金额超过账套审核线，因此必须由审核人员逐笔批准。";
-        setAgentState(matchingNode, "is-complete", "已完成 · 匹配 96%");
-        setAgentState(voucherNode, "is-complete", "已完成 · 科目推荐 93%");
-        setAgentState(humanNode, workflowState.highAmount === "approved" ? "is-complete" : "is-active", workflowState.highAmount === "approved" ? "已批准待导出" : "当前步骤 · 逐笔审核");
+        processCurrent.textContent = "当前：第 4 / 4 组 · 高金额审核";
+        processExplanation.textContent = "整批已有 18 份无异常草稿；当前项草稿也已生成，但金额超过审核线，不能进入批量审核。";
+        setAgentState(matchingNode, "is-complete", "正常项已完成 · 当前项匹配 96%");
+        setAgentState(voucherNode, "is-complete", "已生成 18 份 · 当前项草稿已生成");
+        humanNodeName.textContent = "审核高金额草稿";
+        humanNodeRole.textContent = "审核人员";
+        setAgentState(humanNode, workflowState.highAmount === "exported" ? "is-complete" : "is-active", workflowState.highAmount === "exported" ? "当前项已批准并导出" : workflowState.highAmount === "approved" ? "当前项已批准待导出" : "当前步骤 · 逐笔审核");
         return;
       }
 
-      processCurrent.textContent = workflowState.conflict === "initial" ? "当前：第 1 / 3 项 · 金额确认" : "当前：第 1 / 3 项 · 新草稿审核";
-      processExplanation.textContent = "AI 已识别到发票与流水金额冲突；会计确认正确金额后，系统会重新匹配并生成新草稿。";
+      processCurrent.textContent = workflowState.conflict === "initial" ? "当前：第 2 / 4 组 · 金额确认" : "当前：第 2 / 4 组 · 新草稿审核";
+      processExplanation.textContent = workflowState.conflict === "initial"
+        ? "整批已有 18 份无异常草稿；当前金额冲突项尚未形成草稿，需先确认正确金额。"
+        : "整批已有 18 份无异常草稿；当前项已按人工确认结果重新匹配并生成新草稿。";
       if (workflowState.conflict === "initial") {
-        setAgentState(matchingNode, "is-complete", "已暂停 · 发现 1 项金额冲突");
-        setAgentState(voucherNode, "", "未开始 · 等待金额确认");
+        setAgentState(matchingNode, "is-complete", "正常项已完成 · 当前项因冲突暂停");
+        setAgentState(voucherNode, "", "已生成 18 份 · 当前项尚未生成");
+        humanNodeName.textContent = "会计确认金额";
+        humanNodeRole.textContent = "记账会计";
         setAgentState(humanNode, "is-active", "当前步骤 · 请确认正确金额");
       } else {
-        setAgentState(matchingNode, "is-complete", "已完成 · 新匹配 96%");
-        setAgentState(voucherNode, "is-complete", "已完成 · 已生成新草稿");
-        setAgentState(humanNode, workflowState.conflict === "approved" ? "is-complete" : "is-active", workflowState.conflict === "approved" ? "已批准待导出" : "新草稿等待审核");
+        setAgentState(matchingNode, "is-complete", "正常项已完成 · 当前项新匹配 96%");
+        setAgentState(voucherNode, "is-complete", "已生成 18 份 · 当前项新草稿已生成");
+        humanNodeName.textContent = "审核新草稿";
+        humanNodeRole.textContent = "审核人员";
+        setAgentState(humanNode, workflowState.conflict === "exported" ? "is-complete" : "is-active", workflowState.conflict === "exported" ? "当前项已批准并导出" : workflowState.conflict === "approved" ? "当前项已批准待导出" : "当前步骤 · 审核新草稿");
       }
     }
 
@@ -2220,7 +2378,7 @@
       conflictReviewButton.disabled = true;
       conflictReviewButton.textContent = "已批准，等待导出";
       conflictReviewStatus.classList.add("is-success");
-      conflictReviewStatus.textContent = "新草稿已由审核人员批准，金额冲突待办已结束。";
+      conflictReviewStatus.textContent = "新草稿审核已完成；下一步在“批量审核”组导出已批准凭证。";
       conflictReviewRecord.hidden = false;
       conflictReviewRecord.textContent = "操作记录 · 审核人员 · 陈妍 · 已核对人工确认金额、新匹配结果和新凭证草稿 · 结果：已批准待导出 · 旧版本继续保留在审计记录中。";
       syncConflictTaskState("approved");
@@ -2254,7 +2412,7 @@
         lowConfidenceButton.disabled = true;
         lowConfidenceButton.textContent = "已批准，等待导出";
         lowConfidenceStatus.classList.add("is-success");
-        lowConfidenceStatus.textContent = "新草稿已由审核人员批准，低置信度待办已结束。";
+        lowConfidenceStatus.textContent = "新草稿审核已完成；下一步在“批量审核”组导出已批准凭证。";
         lowConfidenceRecord.textContent += " 审核记录 · 审核人员 · 陈妍 · 已核对人工选择科目、理由和新草稿 · 结果：已批准待导出。";
         workflowState.lowConfidence = "approved";
         workflowState.lastUpdate = "最后更新：低置信度草稿已批准";
@@ -2336,33 +2494,79 @@
     const reviewTitleElement = document.querySelector("#reviewTitle");
     const reviewExcludedMeta = document.querySelector("#reviewExcludedMeta");
     const reviewScopeValue = document.querySelector("#reviewScopeValue");
+    const reviewScopeCopy = document.querySelector("#reviewScopeCopy");
+    const reviewLayout = document.querySelector("#reviewLayout");
+    const reviewDraftsCard = document.querySelector("#reviewDraftsCard");
+    const reviewConfidenceCards = Array.from(document.querySelectorAll("#reviewView .review-summary-card:not(.is-primary)"));
     const reviewHelp = document.querySelector("#reviewHelp");
     const reviewExceptionTitle = document.querySelector("#reviewExceptionTitle");
     const reviewExceptionCopy = document.querySelector("#reviewExceptionCopy");
+    const reviewDecisionTitle = document.querySelector("#reviewDecisionTitle");
     const scopeCheckCopy = document.querySelector("#scopeCheckCopy");
+    const completeTaskAction = document.querySelector("#completeTaskAction");
 
     function getBatchCount() {
       return workflowState.batchSize - (workflowState.batchExcludedState ? 1 : 0);
     }
 
+    function getExportableCount() {
+      const batchReady = workflowState.batchApproved && !workflowState.batchExported ? getBatchCount() : 0;
+      return batchReady + getApprovedExceptionCount();
+    }
+
     function updateReviewScope() {
       const batchCount = getBatchCount();
       const excluded = Boolean(workflowState.batchExcludedState);
-      reviewTitleElement.textContent = `批量审核 ${batchCount} 份凭证草稿`;
-      reviewScopeValue.textContent = `${batchCount} 份草稿`;
+      const exportableCount = getExportableCount();
+      const incrementalExport = workflowState.batchExported && exportableCount > 0;
+      reviewTitleElement.textContent = workflowState.batchExported
+        ? exportableCount
+          ? `导出 ${exportableCount} 份已批准异常草稿`
+          : `查看 ${batchCount} 份无异常凭证的审核结果`
+        : workflowState.batchApproved
+          ? `导出 ${exportableCount} 份已批准凭证`
+          : `批量审核 ${batchCount} 份凭证草稿`;
+      reviewScopeValue.textContent = incrementalExport ? `${exportableCount} 份异常草稿` : `${batchCount} 份草稿`;
+      reviewScopeCopy.textContent = incrementalExport
+        ? "只包含已经完成逐项审核、尚未导出的异常草稿；此前导出的凭证不会重复包含。"
+        : "只包含无异常、高置信度草稿。审核人员批准后，才能生成导出文件。";
+      reviewDecisionTitle.textContent = incrementalExport ? "导出前请确认" : "批准前请确认";
+      reviewLayout.classList.toggle("is-export-only", incrementalExport);
+      reviewDraftsCard.hidden = incrementalExport;
+      reviewConfidenceCards.forEach((card) => { card.hidden = incrementalExport; });
+      scopeCheck.closest("label").hidden = incrementalExport;
+      ledgerCheck.closest("label").hidden = incrementalExport;
       scopeCheckCopy.textContent = `我已确认本次范围为 ${batchCount} 份无异常凭证草稿。`;
       approveButton.textContent = workflowState.batchApproved ? `已批准 ${batchCount} 份草稿` : `批准 ${batchCount} 份草稿`;
       reviewHelp.textContent = excluded
         ? `第一份草稿已移出本次批量范围；其余 ${batchCount} 份无异常草稿仍可继续批准。`
-        : "第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。";
-      reviewExcludedMeta.textContent = excluded
+        : workflowState.batchExported && exportableCount > 0
+          ? `下方保留 ${batchCount} 份无异常凭证的审核记录；当前导出操作只包含新批准的异常草稿。`
+          : "第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。";
+      reviewExcludedMeta.textContent = workflowState.batchExported && exportableCount > 0
+        ? `${exportableCount} 份异常草稿已完成逐项审核，等待增量导出`
+        : excluded
         ? "原有 3 项异常和 1 份已移出的草稿，不在本次批量审核范围内"
         : "金额冲突、低置信度和高金额共 3 项，不在本次批量审核范围内";
-      reviewExceptionTitle.textContent = excluded ? "4 项不会包含在本次批准中" : "异常项不会包含在本次批准中";
-      reviewExceptionCopy.textContent = excluded
+      reviewExceptionTitle.textContent = workflowState.batchExported && exportableCount > 0
+        ? `${exportableCount} 份异常草稿已完成逐项审核`
+        : excluded ? "4 项不会包含在本次批准中" : "异常项不会包含在本次批准中";
+      reviewExceptionCopy.textContent = workflowState.batchExported && exportableCount > 0
+        ? `当前导出只包含这 ${exportableCount} 份已批准异常草稿，不会重复导出已经完成的 ${batchCount} 份无异常凭证。`
+        : excluded
         ? "金额冲突、低置信度和高金额 3 项，以及刚刚移出的 1 份草稿，均按各自状态继续处理；不会阻塞其余正常草稿。"
         : "金额冲突、低置信度和高金额共 3 项，仍按各自状态逐项处理，不能通过批量操作跳过。";
-      if (!workflowState.batchApproved) syncReviewApproval();
+      exportButton.hidden = exportableCount === 0;
+      exportButton.textContent = `导出 ${exportableCount} 份已批准凭证`;
+      if (!workflowState.batchApproved) {
+        syncReviewApproval();
+      } else if (workflowState.batchExported && exportableCount === 0) {
+        reviewStatus.classList.add("is-success");
+        reviewStatus.textContent = "当前已批准凭证均已导出；后续异常草稿批准后，可回到这里继续导出。";
+      } else if (exportableCount > 0) {
+        reviewStatus.classList.add("is-success");
+        reviewStatus.textContent = `当前有 ${exportableCount} 份已批准凭证可导出。`;
+      }
     }
 
     function syncReviewApproval() {
@@ -2462,7 +2666,6 @@
         workflowState.batchApproved = true;
         workflowState.lastUpdate = `最后更新：${batchCount} 份无异常草稿已批准`;
         approveButton.hidden = true;
-        exportButton.hidden = false;
         reviewForm.querySelectorAll("input").forEach((input) => { input.disabled = true; });
         draftRow.querySelectorAll("button").forEach((button) => { button.disabled = true; });
         reviewStatus.classList.add("is-success");
@@ -2472,8 +2675,12 @@
     });
 
     exportButton.addEventListener("click", () => {
-      workflowState.batchExported = true;
-      workflowState.lastUpdate = `最后更新：${getBatchCount()} 份无异常凭证已导出`;
+      const exportCount = getExportableCount();
+      if (workflowState.batchApproved && !workflowState.batchExported) workflowState.batchExported = true;
+      ["conflict", "lowConfidence", "highAmount"].forEach((key) => {
+        if (workflowState[key] === "approved") workflowState[key] = "exported";
+      });
+      workflowState.lastUpdate = `最后更新：${exportCount} 份已批准凭证已导出`;
       updateTaskState();
     });
 
@@ -2490,40 +2697,47 @@
       const batchCount = getBatchCount();
       const counts = getTaskCounts();
       const remaining = counts.manual + counts.confirm + counts.approvedPendingExport;
+      const exportedCount = (workflowState.batchExported ? batchCount : 0) + getExportedExceptionCount();
       const statusParts = [];
       if (counts.manual) statusParts.push(`${counts.manual} 项待人工处理`);
       if (counts.confirm) statusParts.push(`${counts.confirm} 份草稿待审核`);
       if (counts.approvedPendingExport) statusParts.push(`${counts.approvedPendingExport} 份异常草稿已批准待导出`);
       const remainingDetail = statusParts.length ? statusParts.join("、") : "没有剩余处理项";
-      completeTitleElement.textContent = `${batchCount} 份无异常凭证已导出，任务${remaining ? "仍在进行" : "已完成"}`;
-      completeResultCopy.textContent = `这 ${batchCount} 份凭证已经人工批准并生成导出记录。这里完成的是“本次无异常凭证的批量处理”${remaining ? "，不是整项记账任务" : "，整项任务也已结束"}。AI 没有写入正式账簿。`;
-      completeExportedCount.textContent = String(batchCount);
+      completeTitleElement.textContent = `${exportedCount} 份凭证已导出，任务${remaining ? "仍在进行" : "已完成"}`;
+      completeResultCopy.textContent = `这 ${exportedCount} 份凭证已经人工批准并生成导出记录。${remaining ? "任务中仍有未完成处理项" : "全部处理项均已完成或终止"}，AI 没有写入正式账簿。`;
+      completeExportedCount.textContent = String(exportedCount);
       completeRemainingCount.textContent = String(remaining);
       completeRemainingCopy.textContent = remaining
         ? `当前还有${remainingDetail}。这些项目全部完成或终止，且已批准凭证全部导出后，任务状态才会变为“已完成”。`
         : "所有处理项均已完成或终止，且已批准凭证已经导出，任务状态为“已完成”。";
-      completeExportRecord.innerHTML = `<strong>会计 · 陈妍</strong> 导出 ${batchCount} 份已批准凭证，生成记录 EXPORT-20260726-01。`;
+      completeExportRecord.innerHTML = `<strong>会计 · 陈妍</strong> 已累计导出 ${exportedCount} 份已批准凭证，生成记录 EXPORT-20260726-01。`;
       completeApprovalRecord.innerHTML = `<strong>审核人员 · 陈妍</strong> 批量批准 ${batchCount} 份无异常凭证草稿。`;
+      completeTaskAction.textContent = remaining ? "查看剩余待处理项" : "查看已完成任务";
       completeNote.textContent = remaining
-        ? `当前任务状态：待人工处理。${remainingDetail}；已经导出的 ${batchCount} 份凭证不受影响。`
-        : `当前任务状态：已完成。共导出 ${batchCount} 份凭证，所有操作记录均已保留。`;
+        ? `当前任务状态：待人工处理。${remainingDetail}；已经导出的 ${exportedCount} 份凭证不受影响。`
+        : `当前任务状态：已完成。共导出 ${exportedCount} 份凭证，所有操作记录均已保留。`;
     }
+
+    const sharedWorkbench = document.querySelector("#conflictView .workbench");
+    const reviewView = document.querySelector("#reviewView");
+    const conflictReviewView = document.querySelector("#conflictReviewView");
+    sharedWorkbench.append(reviewView, conflictReviewView);
 
     const routeViews = {
       workbench: document.querySelector("#workbenchView"),
       create: document.querySelector("#createView"),
       task: document.querySelector("#taskView"),
-      conflictReview: document.querySelector("#conflictReviewView"),
-      review: document.querySelector("#reviewView"),
       complete: document.querySelector("#completeView"),
-      exceptionWorkbench: document.querySelector("#conflictView")
+      reviewWorkbench: document.querySelector("#conflictView")
     };
-    const exceptionDetailViews = {
+    const workDetailViews = {
+      review: reviewView,
       conflict: document.querySelector("#conflictDecisionView"),
+      conflictReview: conflictReviewView,
       lowConfidence: document.querySelector("#lowConfidenceView"),
       highAmount: document.querySelector("#highAmountView")
     };
-    const exceptionRoutes = new Set(Object.keys(exceptionDetailViews));
+    const workRoutes = new Set(Object.keys(workDetailViews));
     const decisionBar = document.querySelector("#conflictDecisionBar");
 
     function renderRoute() {
@@ -2548,16 +2762,16 @@
           : "workbench";
 
       Object.entries(routeViews).forEach(([name, view]) => {
-        const isActive = name === activeRoute || (name === "exceptionWorkbench" && exceptionRoutes.has(activeRoute));
+        const isActive = name === activeRoute || (name === "reviewWorkbench" && workRoutes.has(activeRoute));
         view.hidden = !isActive;
         view.setAttribute("aria-hidden", String(!isActive));
       });
-      Object.entries(exceptionDetailViews).forEach(([name, view]) => {
+      Object.entries(workDetailViews).forEach(([name, view]) => {
         const isActive = name === activeRoute;
         view.hidden = !isActive;
         view.setAttribute("aria-hidden", String(!isActive));
       });
-      if (exceptionRoutes.has(activeRoute)) renderExceptionWorkbench(activeRoute);
+      if (workRoutes.has(activeRoute)) renderReviewWorkbench(activeRoute);
       decisionBar.hidden = activeRoute !== "conflict";
       if (activeRoute === "conflictReview" && conflictWorkflowStage === "initial") {
         syncConflictTaskState("resolved");
