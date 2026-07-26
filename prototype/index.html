@@ -1185,7 +1185,7 @@
           </div>
           <div class="client-state"><span class="state-dot is-warning" aria-hidden="true"></span>等待会计处理</div>
           <div class="client-counts" aria-label="任务处理数量">
-            <span class="count-block"><span class="count-label">待批量审核</span><span class="count-value">18</span></span>
+            <span class="count-block"><span class="count-label" id="workbenchBatchLabel">待批量审核</span><span class="count-value" id="workbenchBatchCount">18</span></span>
             <span class="count-block"><span class="count-label">待确认</span><span class="count-value" id="workbenchConfirmCount">0</span></span>
             <span class="count-block"><span class="count-label">人工处理中</span><span class="count-value" id="workbenchManualCount">3</span></span>
           </div>
@@ -1280,7 +1280,7 @@
             <div class="task-step is-done"><span class="step-number">1</span><div><div class="task-step-title">识别并整理资料</div><div class="task-step-note">DocumentAgent · 已识别 23 项资料</div></div><span class="step-status">已完成</span></div>
             <div class="task-step is-done"><span class="step-number">2</span><div><div class="task-step-title">匹配银行流水</div><div class="task-step-note" id="taskMatchingNote">MatchingAgent · 正常项已完成，发现 1 项金额冲突</div></div><span class="step-status" id="taskMatchingStatus">正常项已完成</span></div>
             <div class="task-step"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 已生成 18 份草稿，异常项等待处理</div></div><span class="step-status" id="taskVoucherStatus">已生成 18 份</span></div>
-            <div class="task-step"><span class="step-number">4</span><div><div class="task-step-title">会计审核并导出</div><div class="task-step-note">所有草稿必须由会计批准；AI 不会写入正式账簿</div></div><span class="step-status">等待会计审核</span></div>
+            <div class="task-step"><span class="step-number">4</span><div><div class="task-step-title">人工审核并导出</div><div class="task-step-note">所有草稿必须经过人工批准；AI 不会写入正式账簿</div></div><span class="step-status" id="taskReviewStatus">等待人工审核</span></div>
           </div>
         </section>
 
@@ -1291,7 +1291,7 @@
             <div class="progress-track" id="taskProgressTrack" aria-label="任务处理进度 86%"><div class="progress-fill" id="taskProgressFill"></div></div>
           </div>
           <div class="task-stats">
-            <div class="task-stat"><span class="task-stat-label">待批量审核</span><strong class="task-stat-value">18</strong></div>
+            <div class="task-stat"><span class="task-stat-label" id="taskBatchLabel">待批量审核</span><strong class="task-stat-value" id="taskBatchCount">18</strong></div>
             <div class="task-stat is-warning"><span class="task-stat-label">需要确认</span><strong class="task-stat-value" id="taskConfirmCount">0</strong></div>
             <div class="task-stat is-danger"><span class="task-stat-label">必须人工处理</span><strong class="task-stat-value" id="taskManualCount">3</strong></div>
           </div>
@@ -1300,10 +1300,11 @@
         <section class="task-card" aria-labelledby="todoTitle">
           <h2 id="todoTitle">待办事项</h2>
           <ul class="exception-list">
-            <li><a class="exception-link is-primary" href="#review/TASK-2026-07-024"><span class="exception-label is-batch">批量审核</span><span class="exception-copy"><strong>18 份凭证草稿</strong><span>均无异常，识别、匹配和科目推荐置信度均不低于 85%</span></span><span class="todo-state">去审核 →</span></a></li>
+            <li><a class="exception-link is-primary" href="#review/TASK-2026-07-024" id="taskBatchLink"><span class="exception-label is-batch" id="taskBatchTodoLabel">批量审核</span><span class="exception-copy"><strong id="taskBatchTodoTitle">18 份凭证草稿</strong><span id="taskBatchTodoCopy">均无异常，识别、匹配和科目推荐置信度均不低于 85%</span></span><span class="todo-state" id="taskBatchTodoState">去审核 →</span></a></li>
+            <li id="taskBatchExceptionItem" hidden><a class="exception-link" href="#review/TASK-2026-07-024"><span class="exception-label" id="taskBatchExceptionLabel">待审核</span><span class="exception-copy"><strong>云服务年费 · 草稿 V-0712</strong><span id="taskBatchExceptionCopy"></span></span><span class="todo-state">查看记录 →</span></a></li>
             <li><a class="exception-link" href="#conflict/ITEM-009" id="taskConflictLink"><span class="exception-label" id="taskConflictLabel">金额冲突</span><span class="exception-copy"><strong>上海恒际云服务有限公司</strong><span id="taskConflictCopy">发票与流水相差 ¥200.00，需确认正确金额</span></span><span class="todo-state" id="taskConflictState">去处理 →</span></a></li>
-            <li><a class="exception-link" href="#low-confidence/ITEM-014"><span class="exception-label">低置信度</span><span class="exception-copy"><strong>差旅费报销单</strong><span>科目推荐置信度 57%，需人工选择</span></span><span class="todo-state">去处理 →</span></a></li>
-            <li><a class="exception-link" href="#high-amount/ITEM-021"><span class="exception-label">高金额</span><span class="exception-copy"><strong>设备采购发票</strong><span>单笔 ¥68,420.00，按规则必须人工审核</span></span><span class="todo-state">去处理 →</span></a></li>
+            <li><a class="exception-link" href="#low-confidence/ITEM-014" id="taskLowConfidenceLink"><span class="exception-label" id="taskLowConfidenceLabel">低置信度</span><span class="exception-copy"><strong>差旅费报销单</strong><span id="taskLowConfidenceCopy">科目推荐置信度 57%，需人工选择</span></span><span class="todo-state" id="taskLowConfidenceState">去处理 →</span></a></li>
+            <li><a class="exception-link" href="#high-amount/ITEM-021" id="taskHighAmountLink"><span class="exception-label" id="taskHighAmountLabel">高金额</span><span class="exception-copy"><strong>设备采购发票</strong><span id="taskHighAmountCopy">单笔 ¥68,420.00，按规则必须人工审核</span></span><span class="todo-state" id="taskHighAmountState">去处理 →</span></a></li>
           </ul>
         </section>
       </div>
@@ -1352,10 +1353,17 @@
           <label class="field-label" for="lowConfidenceReason">选择理由
             <textarea id="lowConfidenceReason" placeholder="例如：本次出差由销售部门发起，用于客户拜访。"></textarea>
           </label>
-          <div class="exception-impact">保存后，系统会根据人工选择更新凭证草稿。新草稿仍需会计审核，AI 不会写入正式账簿。</div>
+          <div class="exception-impact">保存后，系统会根据会计的选择更新凭证草稿。新草稿仍需审核人员批准，AI 不会写入正式账簿。</div>
           <p class="exception-action-status" id="lowConfidenceStatus" aria-live="polite">请选择科目并填写理由。</p>
           <button class="button button-primary" type="submit" id="lowConfidenceButton">确认科目并更新草稿</button>
           <div class="exception-record" id="lowConfidenceRecord" hidden></div>
+          <div id="lowConfidenceReviewPanel" hidden>
+            <h2>审核人员核对新草稿</h2>
+            <div class="risk-checks">
+              <label class="risk-check"><input type="checkbox" id="lowSubjectCheck"><span>我已核对人工选择的科目和选择理由。</span></label>
+              <label class="risk-check"><input type="checkbox" id="lowDraftCheck"><span>我已核对更新后的凭证草稿，确认可以批准。</span></label>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -1461,7 +1469,7 @@
           <div class="review-meta">
             <span class="mono">TASK-2026-07-024</span>
             <span>识别、匹配和科目推荐置信度均 ≥85%</span>
-            <span>金额冲突、低置信度和高金额共 3 项，不在本次批量审核范围内</span>
+            <span id="reviewExcludedMeta">金额冲突、低置信度和高金额共 3 项，不在本次批量审核范围内</span>
           </div>
         </div>
         <div class="review-actions">
@@ -1472,7 +1480,7 @@
       <section class="review-summary" aria-label="本次批量审核范围">
         <div class="review-summary-card is-primary">
           <span class="review-summary-label">本次操作范围</span>
-          <strong class="review-summary-value">18 份草稿</strong>
+          <strong class="review-summary-value" id="reviewScopeValue">18 份草稿</strong>
           <p class="review-summary-copy">只包含无异常、高置信度草稿。审核人员批准后，才能生成导出文件。</p>
         </div>
         <div class="review-summary-card"><span class="review-summary-label">最低识别置信度</span><strong class="review-summary-value">92%</strong></div>
@@ -1483,7 +1491,7 @@
       <div class="review-layout">
         <section class="review-card" aria-labelledby="draftsTitle">
           <h2 id="draftsTitle">查看草稿和 AI 判断依据</h2>
-          <p class="review-help">第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。</p>
+          <p class="review-help" id="reviewHelp">第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。</p>
           <ul class="draft-list">
             <li class="draft-row is-expanded">
               <input type="checkbox" checked aria-label="选择云服务年费凭证草稿">
@@ -1555,10 +1563,10 @@
         <form class="review-card review-decision" id="reviewForm" aria-labelledby="reviewDecisionTitle">
           <h2 id="reviewDecisionTitle">批准前请确认</h2>
           <div class="decision-callout is-warning">
-            <strong>异常项不会包含在本次批准中</strong>
-            <p>金额冲突、低置信度和高金额共 3 项，仍留在人工处理列表中，不能通过批量操作跳过。</p>
+            <strong id="reviewExceptionTitle">异常项不会包含在本次批准中</strong>
+            <p id="reviewExceptionCopy">金额冲突、低置信度和高金额共 3 项，仍留在人工处理列表中，不能通过批量操作跳过。</p>
           </div>
-          <label class="review-check"><input type="checkbox" id="scopeCheck"><span>我已确认本次范围为 18 份无异常凭证草稿。</span></label>
+          <label class="review-check"><input type="checkbox" id="scopeCheck"><span id="scopeCheckCopy">我已确认本次范围为 18 份无异常凭证草稿。</span></label>
           <label class="review-check"><input type="checkbox" id="ledgerCheck"><span>我理解批准只生成可导出凭证，不会写入正式账簿。</span></label>
           <p class="review-status" id="reviewStatus" aria-live="polite">批准后，18 份草稿进入可导出状态，并记录操作者、时间和草稿范围。</p>
           <button class="button button-primary review-submit" type="submit" id="approveButton" disabled>批准 18 份草稿</button>
@@ -1590,27 +1598,27 @@
         <section class="complete-card" aria-labelledby="resultSummaryTitle">
           <div class="complete-mark" aria-hidden="true">✓</div>
           <h2 id="resultSummaryTitle">本次批量审核与导出已完成</h2>
-          <p>这 18 份凭证已经人工批准并生成导出记录。这里完成的是“无异常凭证的批量处理”，不是整项记账任务。AI 没有写入正式账簿。</p>
+          <p id="completeResultCopy">这 18 份凭证已经人工批准并生成导出记录。这里完成的是“无异常凭证的批量处理”，不是整项记账任务。AI 没有写入正式账簿。</p>
           <div class="complete-stats">
-            <div class="complete-stat"><span class="complete-stat-label">已批准并导出</span><strong class="complete-stat-value">18</strong></div>
-            <div class="complete-stat is-warning"><span class="complete-stat-label">仍待人工处理</span><strong class="complete-stat-value">3</strong></div>
+            <div class="complete-stat"><span class="complete-stat-label">已批准并导出</span><strong class="complete-stat-value" id="completeExportedCount">18</strong></div>
+            <div class="complete-stat is-warning"><span class="complete-stat-label">任务内未完成</span><strong class="complete-stat-value" id="completeRemainingCount">3</strong></div>
           </div>
           <div class="decision-callout is-warning">
             <strong>整项任务何时才算完成</strong>
-            <p>剩余 3 项异常全部完成或终止，且它们产生的已批准凭证全部导出后，任务状态才会变为“已完成”。</p>
+            <p id="completeRemainingCopy">剩余 3 项异常全部完成或终止，且它们产生的已批准凭证全部导出后，任务状态才会变为“已完成”。</p>
           </div>
         </section>
 
         <section class="complete-card" aria-labelledby="exportRecordTitle">
           <h2 id="exportRecordTitle">操作记录</h2>
           <ol class="complete-timeline">
-            <li><time>10:31:42</time><span><strong>会计 · 陈妍</strong> 导出 18 份已批准凭证，生成记录 EXPORT-20260726-01。</span></li>
-            <li><time>10:31:18</time><span><strong>审核人员 · 陈妍</strong> 批量批准 18 份无异常凭证草稿。</span></li>
+            <li><time>10:31:42</time><span id="completeExportRecord"><strong>会计 · 陈妍</strong> 导出 18 份已批准凭证，生成记录 EXPORT-20260726-01。</span></li>
+            <li><time>10:31:18</time><span id="completeApprovalRecord"><strong>审核人员 · 陈妍</strong> 批量批准 18 份无异常凭证草稿。</span></li>
             <li><time>10:24:06</time><span><strong>系统 · VoucherAgent</strong> 生成凭证草稿，并按每项最低置信度分配审核列表。</span></li>
           </ol>
         </section>
       </div>
-      <p class="complete-note">当前任务状态：待人工处理。3 项异常仍需逐项处理；已经导出的 18 份凭证不受影响。</p>
+      <p class="complete-note" id="completeNote">当前任务状态：待人工处理。3 项异常仍需逐项处理；已经导出的 18 份凭证不受影响。</p>
     </div>
   </section>
 
@@ -1839,80 +1847,185 @@
     const taskProgressFill = document.querySelector("#taskProgressFill");
     const taskConfirmCount = document.querySelector("#taskConfirmCount");
     const taskManualCount = document.querySelector("#taskManualCount");
+    const taskBatchLabel = document.querySelector("#taskBatchLabel");
+    const taskBatchCount = document.querySelector("#taskBatchCount");
+    const taskReviewStatus = document.querySelector("#taskReviewStatus");
+    const workbenchBatchLabel = document.querySelector("#workbenchBatchLabel");
+    const workbenchBatchCount = document.querySelector("#workbenchBatchCount");
     const workbenchConfirmCount = document.querySelector("#workbenchConfirmCount");
     const workbenchManualCount = document.querySelector("#workbenchManualCount");
+    const taskBatchLink = document.querySelector("#taskBatchLink");
+    const taskBatchTodoLabel = document.querySelector("#taskBatchTodoLabel");
+    const taskBatchTodoTitle = document.querySelector("#taskBatchTodoTitle");
+    const taskBatchTodoCopy = document.querySelector("#taskBatchTodoCopy");
+    const taskBatchTodoState = document.querySelector("#taskBatchTodoState");
+    const taskBatchExceptionItem = document.querySelector("#taskBatchExceptionItem");
+    const taskBatchExceptionLabel = document.querySelector("#taskBatchExceptionLabel");
+    const taskBatchExceptionCopy = document.querySelector("#taskBatchExceptionCopy");
     const taskConflictLink = document.querySelector("#taskConflictLink");
     const taskConflictLabel = document.querySelector("#taskConflictLabel");
     const taskConflictCopy = document.querySelector("#taskConflictCopy");
     const taskConflictState = document.querySelector("#taskConflictState");
+    const taskLowConfidenceLabel = document.querySelector("#taskLowConfidenceLabel");
+    const taskLowConfidenceCopy = document.querySelector("#taskLowConfidenceCopy");
+    const taskLowConfidenceState = document.querySelector("#taskLowConfidenceState");
+    const taskHighAmountLabel = document.querySelector("#taskHighAmountLabel");
+    const taskHighAmountCopy = document.querySelector("#taskHighAmountCopy");
+    const taskHighAmountState = document.querySelector("#taskHighAmountState");
+    const workflowState = {
+      conflict: "initial",
+      lowConfidence: "initial",
+      highAmount: "initial",
+      batchSize: 18,
+      batchExcludedState: null,
+      batchApproved: false,
+      batchExported: false,
+      lastUpdate: "最后更新 10:23"
+    };
     let conflictWorkflowStage = "initial";
 
-    function syncConflictTaskState(stage) {
-      conflictWorkflowStage = stage;
-      taskConflictLink.classList.toggle("is-resolved", stage !== "initial");
+    function getTaskCounts() {
+      let confirm = 0;
+      let manual = 0;
+      let approvedPendingExport = 0;
+      if (workflowState.conflict === "initial") manual += 1;
+      else if (workflowState.conflict === "resolved") confirm += 1;
+      else approvedPendingExport += 1;
+      if (workflowState.lowConfidence === "initial") manual += 1;
+      else if (workflowState.lowConfidence === "draft-ready") confirm += 1;
+      else approvedPendingExport += 1;
+      if (workflowState.highAmount === "initial") manual += 1;
+      else approvedPendingExport += 1;
+      if (workflowState.batchExcludedState === "review") confirm += 1;
+      if (workflowState.batchExcludedState === "redo") manual += 1;
+      return { confirm, manual, approvedPendingExport };
+    }
 
-      if (stage === "resolved") {
-        taskTitleElement.textContent = "18 份草稿待批量审核，1 份新草稿待确认，2 项异常待处理";
-        taskUpdated.textContent = "最后更新：金额冲突已确认";
+    function updateTaskState() {
+      const batchCount = workflowState.batchSize - (workflowState.batchExcludedState ? 1 : 0);
+      const counts = getTaskCounts();
+      const titleParts = [];
+      if (workflowState.batchExported) titleParts.push(`${batchCount} 份无异常凭证已导出`);
+      else if (workflowState.batchApproved) titleParts.push(`${batchCount} 份草稿已批准待导出`);
+      else titleParts.push(`${batchCount} 份草稿待批量审核`);
+      if (counts.confirm) titleParts.push(`${counts.confirm} 份草稿待审核`);
+      if (counts.manual) titleParts.push(`${counts.manual} 项待人工处理`);
+      if (counts.approvedPendingExport) titleParts.push(`${counts.approvedPendingExport} 份异常草稿已批准待导出`);
+      taskTitleElement.textContent = titleParts.join("，");
+      taskUpdated.textContent = workflowState.lastUpdate;
+      taskConfirmCount.textContent = String(counts.confirm);
+      taskManualCount.textContent = String(counts.manual);
+      workbenchConfirmCount.textContent = String(counts.confirm);
+      workbenchManualCount.textContent = String(counts.manual);
+
+      const batchLabel = workflowState.batchExported ? "已批量导出" : workflowState.batchApproved ? "已批准待导出" : "待批量审核";
+      taskBatchLabel.textContent = batchLabel;
+      taskBatchCount.textContent = String(batchCount);
+      workbenchBatchLabel.textContent = batchLabel;
+      workbenchBatchCount.textContent = String(batchCount);
+      taskBatchTodoTitle.textContent = `${batchCount} 份凭证草稿`;
+      if (workflowState.batchExported) {
+        taskBatchLink.setAttribute("href", "#complete/TASK-2026-07-024");
+        taskBatchTodoLabel.textContent = "已导出";
+        taskBatchTodoCopy.textContent = "已完成人工批准并生成导出记录，不受剩余异常项影响";
+        taskBatchTodoState.textContent = "查看结果 →";
+        taskReviewStatus.textContent = "批量凭证已导出";
+      } else if (workflowState.batchApproved) {
+        taskBatchLink.setAttribute("href", "#review/TASK-2026-07-024");
+        taskBatchTodoLabel.textContent = "待导出";
+        taskBatchTodoCopy.textContent = "已由审核人员批准，等待会计生成导出文件";
+        taskBatchTodoState.textContent = "去导出 →";
+        taskReviewStatus.textContent = "等待会计导出";
+      } else {
+        taskBatchLink.setAttribute("href", "#review/TASK-2026-07-024");
+        taskBatchTodoLabel.textContent = "批量审核";
+        taskBatchTodoCopy.textContent = "均无异常，识别、匹配和科目推荐置信度均不低于 85%";
+        taskBatchTodoState.textContent = "去审核 →";
+        taskReviewStatus.textContent = "等待人工审核";
+      }
+
+      taskBatchExceptionItem.hidden = !workflowState.batchExcludedState;
+      if (workflowState.batchExcludedState === "review") {
+        taskBatchExceptionLabel.textContent = "待审核";
+        taskBatchExceptionCopy.textContent = "会计已修改科目，本草稿移出批量范围并等待重新审核";
+      } else if (workflowState.batchExcludedState === "redo") {
+        taskBatchExceptionLabel.textContent = "退回重做";
+        taskBatchExceptionCopy.textContent = "审核人员已填写驳回原因，本草稿等待重新生成";
+      } else if (workflowState.batchExcludedState === "terminated") {
+        taskBatchExceptionLabel.textContent = "已终止";
+        taskBatchExceptionCopy.textContent = "审核人员已终止该处理项，原因保留在操作记录中";
+      }
+
+      taskConflictLink.classList.toggle("is-resolved", workflowState.conflict !== "initial");
+      if (workflowState.conflict === "initial") {
+        taskConflictLink.setAttribute("href", "#conflict/ITEM-009");
+        taskConflictLabel.textContent = "金额冲突";
+        taskConflictCopy.textContent = "发票与流水相差 ¥200.00，需确认正确金额";
+        taskConflictState.textContent = "去处理 →";
+        taskMatchingNote.textContent = "MatchingAgent · 正常项已完成，发现 1 项金额冲突";
+        taskMatchingStatus.textContent = "正常项已完成";
+        taskVoucherNote.textContent = "VoucherAgent · 已生成 18 份草稿，异常项等待处理";
+        taskVoucherStatus.textContent = "已生成 18 份";
+        taskProgressCopy.textContent = `AI 已识别 23 份资料并形成 21 个处理项，其中 ${batchCount} 项可以进入批量审核`;
+        taskProgressValue.textContent = "18 / 21 项";
+        taskProgressTrack.setAttribute("aria-label", "任务处理进度 86%");
+        taskProgressFill.style.width = "86%";
+      } else {
+        taskConflictLink.setAttribute("href", "#conflict-review/ITEM-009");
         taskMatchingNote.textContent = "MatchingAgent · 金额冲突已解除，新匹配置信度 96%";
         taskMatchingStatus.textContent = "已重新匹配";
-        taskVoucherNote.textContent = "VoucherAgent · 已生成 19 份草稿，其中 1 份等待逐笔审核";
-        taskVoucherStatus.textContent = "已生成 19 份";
+        taskVoucherNote.textContent = workflowState.conflict === "approved"
+          ? "VoucherAgent · 冲突项已生成新草稿并通过人工审核"
+          : "VoucherAgent · 冲突项已生成新草稿，等待逐笔审核";
+        taskVoucherStatus.textContent = workflowState.conflict === "approved" ? "1 份已批准" : "已生成 19 份";
         taskProgressCopy.textContent = "金额冲突项已重新匹配并生成新草稿，当前有 19 个处理项形成草稿";
         taskProgressValue.textContent = "19 / 21 项";
         taskProgressTrack.setAttribute("aria-label", "任务处理进度 90%");
         taskProgressFill.style.width = "90%";
-        taskConfirmCount.textContent = "1";
-        taskManualCount.textContent = "2";
-        workbenchConfirmCount.textContent = "1";
-        workbenchManualCount.textContent = "2";
-        taskConflictLink.setAttribute("href", "#conflict-review/ITEM-009");
-        taskConflictLabel.textContent = "待审核";
-        taskConflictCopy.textContent = "金额已确认并生成新草稿，需审核人员逐笔批准";
-        taskConflictState.textContent = "去审核 →";
-        return;
+        taskConflictLabel.textContent = workflowState.conflict === "approved" ? "已批准待导出" : "待审核";
+        taskConflictCopy.textContent = workflowState.conflict === "approved"
+          ? "人工确认金额后已重新匹配，新草稿已由审核人员批准"
+          : "金额已确认并生成新草稿，需审核人员逐笔批准";
+        taskConflictState.textContent = workflowState.conflict === "approved" ? "查看结果 →" : "去审核 →";
       }
 
-      if (stage === "approved") {
-        taskTitleElement.textContent = "18 份草稿待批量审核，2 项异常待处理，1 份已批准待导出";
-        taskUpdated.textContent = "最后更新：冲突草稿已批准";
-        taskMatchingNote.textContent = "MatchingAgent · 金额冲突已解除，新匹配置信度 96%";
-        taskMatchingStatus.textContent = "已重新匹配";
-        taskVoucherNote.textContent = "VoucherAgent · 已生成 19 份草稿，冲突草稿已人工批准";
-        taskVoucherStatus.textContent = "1 份已批准";
-        taskProgressCopy.textContent = "金额冲突项已完成人工确认和草稿审核，仍有 2 项异常等待处理";
-        taskProgressValue.textContent = "19 / 21 项";
-        taskProgressTrack.setAttribute("aria-label", "任务处理进度 90%");
-        taskProgressFill.style.width = "90%";
-        taskConfirmCount.textContent = "0";
-        taskManualCount.textContent = "2";
-        workbenchConfirmCount.textContent = "0";
-        workbenchManualCount.textContent = "2";
-        taskConflictLink.setAttribute("href", "#conflict-review/ITEM-009");
-        taskConflictLabel.textContent = "已批准待导出";
-        taskConflictCopy.textContent = "人工确认金额后已重新匹配，新草稿已由审核人员批准";
-        taskConflictState.textContent = "查看结果 →";
-        return;
+      if (workflowState.lowConfidence === "initial") {
+        taskLowConfidenceLabel.textContent = "低置信度";
+        taskLowConfidenceCopy.textContent = "科目推荐置信度 57%，需会计选择";
+        taskLowConfidenceState.textContent = "去处理 →";
+      } else if (workflowState.lowConfidence === "draft-ready") {
+        taskLowConfidenceLabel.textContent = "待审核";
+        taskLowConfidenceCopy.textContent = "会计已选择科目并生成新草稿，需审核人员批准";
+        taskLowConfidenceState.textContent = "去审核 →";
+      } else {
+        taskLowConfidenceLabel.textContent = "已批准待导出";
+        taskLowConfidenceCopy.textContent = "人工选择的科目和新草稿已由审核人员批准";
+        taskLowConfidenceState.textContent = "查看结果 →";
       }
 
-      taskTitleElement.textContent = "18 份草稿待批量审核，3 项异常待处理";
-      taskUpdated.textContent = "最后更新 10:23";
-      taskMatchingNote.textContent = "MatchingAgent · 正常项已完成，发现 1 项金额冲突";
-      taskMatchingStatus.textContent = "正常项已完成";
-      taskVoucherNote.textContent = "VoucherAgent · 已生成 18 份草稿，异常项等待处理";
-      taskVoucherStatus.textContent = "已生成 18 份";
-      taskProgressCopy.textContent = "AI 已识别 23 份资料并形成 21 个处理项，其中 18 项可以进入批量审核";
-      taskProgressValue.textContent = "18 / 21 项";
-      taskProgressTrack.setAttribute("aria-label", "任务处理进度 86%");
-      taskProgressFill.style.width = "86%";
-      taskConfirmCount.textContent = "0";
-      taskManualCount.textContent = "3";
-      workbenchConfirmCount.textContent = "0";
-      workbenchManualCount.textContent = "3";
-      taskConflictLink.setAttribute("href", "#conflict/ITEM-009");
-      taskConflictLabel.textContent = "金额冲突";
-      taskConflictCopy.textContent = "发票与流水相差 ¥200.00，需确认正确金额";
-      taskConflictState.textContent = "去处理 →";
+      if (workflowState.highAmount === "initial") {
+        taskHighAmountLabel.textContent = "高金额";
+        taskHighAmountCopy.textContent = "单笔 ¥68,420.00，按规则必须人工审核";
+        taskHighAmountState.textContent = "去处理 →";
+      } else {
+        taskHighAmountLabel.textContent = "已批准待导出";
+        taskHighAmountCopy.textContent = "高金额草稿已由审核人员逐笔批准";
+        taskHighAmountState.textContent = "查看结果 →";
+      }
+
+      if (typeof updateReviewScope === "function") updateReviewScope();
+      if (typeof updateCompleteView === "function") updateCompleteView();
+    }
+
+    function syncConflictTaskState(stage) {
+      conflictWorkflowStage = stage;
+      workflowState.conflict = stage;
+      workflowState.lastUpdate = stage === "initial"
+        ? "最后更新 10:23"
+        : stage === "resolved"
+          ? "最后更新：金额冲突已确认"
+          : "最后更新：冲突草稿已批准";
+      updateTaskState();
     }
 
     function setAgentState(node, state, copy) {
@@ -2002,6 +2115,8 @@
       setAgentState(voucherNode, "", "等待冲突解除");
       setAgentState(humanNode, "is-active", "当前步骤");
       syncConflictTaskState("initial");
+      workflowState.lastUpdate = "最后更新：金额冲突已恢复待处理";
+      updateTaskState();
     });
 
     const conflictReviewForm = document.querySelector("#conflictReviewForm");
@@ -2038,9 +2153,37 @@
     const lowConfidenceButton = document.querySelector("#lowConfidenceButton");
     const lowConfidenceStatus = document.querySelector("#lowConfidenceStatus");
     const lowConfidenceRecord = document.querySelector("#lowConfidenceRecord");
+    const lowConfidenceReviewPanel = document.querySelector("#lowConfidenceReviewPanel");
+    const lowSubjectCheck = document.querySelector("#lowSubjectCheck");
+    const lowDraftCheck = document.querySelector("#lowDraftCheck");
+
+    function syncLowConfidenceApproval() {
+      if (workflowState.lowConfidence !== "draft-ready") return;
+      const ready = lowSubjectCheck.checked && lowDraftCheck.checked;
+      lowConfidenceButton.disabled = !ready;
+      lowConfidenceStatus.textContent = ready ? "核对完成，可以批准这份新草稿。" : "新草稿已生成，审核人员完成两项核对后才能批准。";
+    }
+
+    lowSubjectCheck.addEventListener("change", syncLowConfidenceApproval);
+    lowDraftCheck.addEventListener("change", syncLowConfidenceApproval);
 
     lowConfidenceForm.addEventListener("submit", (event) => {
       event.preventDefault();
+      if (workflowState.lowConfidence === "draft-ready") {
+        if (lowConfidenceButton.disabled) return;
+        lowSubjectCheck.disabled = true;
+        lowDraftCheck.disabled = true;
+        lowConfidenceButton.disabled = true;
+        lowConfidenceButton.textContent = "已批准，等待导出";
+        lowConfidenceStatus.classList.add("is-success");
+        lowConfidenceStatus.textContent = "新草稿已由审核人员批准，低置信度待办已结束。";
+        lowConfidenceRecord.textContent += " 审核记录 · 审核人员 · 陈妍 · 已核对人工选择科目、理由和新草稿 · 结果：已批准待导出。";
+        workflowState.lowConfidence = "approved";
+        workflowState.lastUpdate = "最后更新：低置信度草稿已批准";
+        updateTaskState();
+        return;
+      }
+
       const selectedSubject = lowConfidenceForm.querySelector('input[name="subject"]:checked');
       const reason = lowConfidenceReason.value.trim();
       if (!selectedSubject || !reason) {
@@ -2050,13 +2193,18 @@
         return;
       }
 
-      lowConfidenceForm.querySelectorAll("input, textarea").forEach((input) => { input.disabled = true; });
+      lowConfidenceForm.querySelectorAll('input[name="subject"], textarea').forEach((input) => { input.disabled = true; });
       lowConfidenceButton.disabled = true;
-      lowConfidenceButton.textContent = "草稿已更新";
+      lowConfidenceButton.textContent = "批准这份新草稿";
       lowConfidenceStatus.classList.add("is-success");
-      lowConfidenceStatus.textContent = "已按人工选择更新凭证草稿，下一步由会计审核新草稿。";
+      lowConfidenceStatus.textContent = "已按会计选择更新凭证草稿，下一步由审核人员核对并批准。";
       lowConfidenceRecord.hidden = false;
       lowConfidenceRecord.textContent = `操作记录 · 会计 · 陈妍 · 原建议：管理费用—差旅费（57%） · 人工选择：${selectedSubject.value} · 理由：${reason} · 影响：旧草稿停止使用，生成新草稿。`;
+      lowConfidenceReviewPanel.hidden = false;
+      workflowState.lowConfidence = "draft-ready";
+      workflowState.lastUpdate = "最后更新：低置信度科目已确认";
+      updateTaskState();
+      syncLowConfidenceApproval();
     });
 
     const highAmountForm = document.querySelector("#highAmountForm");
@@ -2085,6 +2233,9 @@
       highAmountStatus.textContent = "这份草稿已由审核人员逐笔批准，可以和其他已批准凭证一起导出。";
       highAmountRecord.hidden = false;
       highAmountRecord.textContent = "操作记录 · 审核人员 · 陈妍 · 已核对发票、流水、金额和会计科目 · 结果：已批准待导出 · AI 未写入正式账簿。";
+      workflowState.highAmount = "approved";
+      workflowState.lastUpdate = "最后更新：高金额草稿已批准";
+      updateTaskState();
     });
 
     const reviewForm = document.querySelector("#reviewForm");
@@ -2104,19 +2255,62 @@
     const rejectAction = document.querySelector("#rejectAction");
     const draftChangeRecord = document.querySelector("#draftChangeRecord");
     const originalSubject = "管理费用—办公费";
-    let reviewHasException = false;
+    const reviewTitleElement = document.querySelector("#reviewTitle");
+    const reviewExcludedMeta = document.querySelector("#reviewExcludedMeta");
+    const reviewScopeValue = document.querySelector("#reviewScopeValue");
+    const reviewHelp = document.querySelector("#reviewHelp");
+    const reviewExceptionTitle = document.querySelector("#reviewExceptionTitle");
+    const reviewExceptionCopy = document.querySelector("#reviewExceptionCopy");
+    const scopeCheckCopy = document.querySelector("#scopeCheckCopy");
+
+    function getBatchCount() {
+      return workflowState.batchSize - (workflowState.batchExcludedState ? 1 : 0);
+    }
+
+    function updateReviewScope() {
+      const batchCount = getBatchCount();
+      const excluded = Boolean(workflowState.batchExcludedState);
+      reviewTitleElement.textContent = `批量审核 ${batchCount} 份凭证草稿`;
+      reviewScopeValue.textContent = `${batchCount} 份草稿`;
+      scopeCheckCopy.textContent = `我已确认本次范围为 ${batchCount} 份无异常凭证草稿。`;
+      approveButton.textContent = workflowState.batchApproved ? `已批准 ${batchCount} 份草稿` : `批准 ${batchCount} 份草稿`;
+      reviewHelp.textContent = excluded
+        ? `第一份草稿已移出本次批量范围；其余 ${batchCount} 份无异常草稿仍可继续批准。`
+        : "第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。";
+      reviewExcludedMeta.textContent = excluded
+        ? "原有 3 项异常和 1 份已移出的草稿，不在本次批量审核范围内"
+        : "金额冲突、低置信度和高金额共 3 项，不在本次批量审核范围内";
+      reviewExceptionTitle.textContent = excluded ? "4 项不会包含在本次批准中" : "异常项不会包含在本次批准中";
+      reviewExceptionCopy.textContent = excluded
+        ? "金额冲突、低置信度和高金额 3 项，以及刚刚移出的 1 份草稿，均按各自状态继续处理；不会阻塞其余正常草稿。"
+        : "金额冲突、低置信度和高金额共 3 项，仍按各自状态逐项处理，不能通过批量操作跳过。";
+      if (!workflowState.batchApproved) syncReviewApproval();
+    }
 
     function syncReviewApproval() {
-      const ready = scopeCheck.checked && ledgerCheck.checked && !reviewHasException;
+      const ready = scopeCheck.checked && ledgerCheck.checked && getBatchCount() > 0;
       approveButton.disabled = !ready;
       if (!ready) {
         reviewStatus.classList.remove("is-success");
-        reviewStatus.textContent = reviewHasException
-          ? "当前草稿已被人工修改或驳回，不能继续批量批准；请按新的状态重新处理。"
-          : "请确认批准范围和正式账簿边界后再继续。";
+        reviewStatus.textContent = "请确认批准范围和正式账簿边界后再继续。";
       } else if (!approveButton.hidden) {
-        reviewStatus.textContent = "批准后，18 份草稿进入可导出状态，并记录操作者、时间和草稿范围。";
+        reviewStatus.textContent = `批准后，${getBatchCount()} 份草稿进入可导出状态，并记录操作者、时间和草稿范围。`;
       }
+    }
+
+    function excludeDraftFromBatch(nextState) {
+      if (workflowState.batchExcludedState) return;
+      workflowState.batchExcludedState = nextState;
+      workflowState.lastUpdate = nextState === "review"
+        ? "最后更新：1 份草稿已修改并移出批量范围"
+        : nextState === "redo"
+          ? "最后更新：1 份草稿已退回重做"
+          : "最后更新：1 个处理项已终止";
+      draftRow.querySelectorAll("[data-draft-action]").forEach((button) => { button.disabled = true; });
+      scopeCheck.checked = false;
+      updateTaskState();
+      reviewStatus.classList.remove("is-success");
+      reviewStatus.textContent = `该草稿已移出本次范围。请重新确认其余 ${getBatchCount()} 份草稿后继续批准。`;
     }
 
     scopeCheck.addEventListener("change", syncReviewApproval);
@@ -2155,8 +2349,7 @@
       draftChangeRecord.hidden = false;
       draftChangeRecord.textContent = `修改记录 · 会计 · 陈妍 · 前值：${originalSubject} · 后值：${subjectSelect.value} · 理由：${reason} · 影响：本草稿移出批量批准范围，需重新审核。`;
       modifyPanel.hidden = true;
-      reviewHasException = true;
-      syncReviewApproval();
+      excludeDraftFromBatch("review");
     });
 
     document.querySelector("#saveRejectButton").addEventListener("click", () => {
@@ -2172,28 +2365,71 @@
       draftCheckbox.checked = false;
       draftCheckbox.disabled = true;
       draftChangeRecord.hidden = false;
-      draftChangeRecord.textContent = `驳回记录 · 会计 · 陈妍 · 去向：${rejectAction.value} · 理由：${reason} · 影响：本草稿不进入导出范围。`;
+      draftChangeRecord.textContent = `驳回记录 · 审核人员 · 陈妍 · 去向：${rejectAction.value} · 理由：${reason} · 影响：本草稿不进入导出范围。`;
       rejectPanel.hidden = true;
-      reviewHasException = true;
-      syncReviewApproval();
+      excludeDraftFromBatch(rejectAction.value === "终止该项" ? "terminated" : "redo");
     });
 
     reviewForm.addEventListener("submit", (event) => {
       event.preventDefault();
-      if (!scopeCheck.checked || !ledgerCheck.checked || reviewHasException || approveButton.disabled) return;
+      if (!scopeCheck.checked || !ledgerCheck.checked || approveButton.disabled) return;
 
       approveButton.disabled = true;
       approveButton.textContent = "正在记录批准结果";
       reviewStatus.classList.remove("is-success");
-      reviewStatus.textContent = "正在记录批量批准结果；3 项异常仍留在人工处理列表中。";
+      reviewStatus.textContent = `正在记录 ${getBatchCount()} 份草稿的批量批准结果；范围外项目仍按各自状态继续处理。`;
 
       window.setTimeout(() => {
+        const batchCount = getBatchCount();
+        workflowState.batchApproved = true;
+        workflowState.lastUpdate = `最后更新：${batchCount} 份无异常草稿已批准`;
         approveButton.hidden = true;
         exportButton.hidden = false;
+        reviewForm.querySelectorAll("input").forEach((input) => { input.disabled = true; });
+        draftRow.querySelectorAll("button").forEach((button) => { button.disabled = true; });
         reviewStatus.classList.add("is-success");
-        reviewStatus.textContent = "已批准 18 份草稿。下一步：导出已批准凭证并查看结果。";
+        reviewStatus.textContent = `已批准 ${batchCount} 份草稿。下一步：导出已批准凭证并查看结果。`;
+        updateTaskState();
       }, 700);
     });
+
+    exportButton.addEventListener("click", () => {
+      workflowState.batchExported = true;
+      workflowState.lastUpdate = `最后更新：${getBatchCount()} 份无异常凭证已导出`;
+      updateTaskState();
+    });
+
+    const completeTitleElement = document.querySelector("#completeTitle");
+    const completeResultCopy = document.querySelector("#completeResultCopy");
+    const completeExportedCount = document.querySelector("#completeExportedCount");
+    const completeRemainingCount = document.querySelector("#completeRemainingCount");
+    const completeRemainingCopy = document.querySelector("#completeRemainingCopy");
+    const completeExportRecord = document.querySelector("#completeExportRecord");
+    const completeApprovalRecord = document.querySelector("#completeApprovalRecord");
+    const completeNote = document.querySelector("#completeNote");
+
+    function updateCompleteView() {
+      const batchCount = getBatchCount();
+      const counts = getTaskCounts();
+      const remaining = counts.manual + counts.confirm + counts.approvedPendingExport;
+      const statusParts = [];
+      if (counts.manual) statusParts.push(`${counts.manual} 项待人工处理`);
+      if (counts.confirm) statusParts.push(`${counts.confirm} 份草稿待审核`);
+      if (counts.approvedPendingExport) statusParts.push(`${counts.approvedPendingExport} 份异常草稿已批准待导出`);
+      const remainingDetail = statusParts.length ? statusParts.join("、") : "没有剩余处理项";
+      completeTitleElement.textContent = `${batchCount} 份无异常凭证已导出，任务${remaining ? "仍在进行" : "已完成"}`;
+      completeResultCopy.textContent = `这 ${batchCount} 份凭证已经人工批准并生成导出记录。这里完成的是“本次无异常凭证的批量处理”${remaining ? "，不是整项记账任务" : "，整项任务也已结束"}。AI 没有写入正式账簿。`;
+      completeExportedCount.textContent = String(batchCount);
+      completeRemainingCount.textContent = String(remaining);
+      completeRemainingCopy.textContent = remaining
+        ? `当前还有${remainingDetail}。这些项目全部完成或终止，且已批准凭证全部导出后，任务状态才会变为“已完成”。`
+        : "所有处理项均已完成或终止，且已批准凭证已经导出，任务状态为“已完成”。";
+      completeExportRecord.innerHTML = `<strong>会计 · 陈妍</strong> 导出 ${batchCount} 份已批准凭证，生成记录 EXPORT-20260726-01。`;
+      completeApprovalRecord.innerHTML = `<strong>审核人员 · 陈妍</strong> 批量批准 ${batchCount} 份无异常凭证草稿。`;
+      completeNote.textContent = remaining
+        ? `当前任务状态：待人工处理。${remainingDetail}；已经导出的 ${batchCount} 份凭证不受影响。`
+        : `当前任务状态：已完成。共导出 ${batchCount} 份凭证，所有操作记录均已保留。`;
+    }
 
     const routeViews = {
       workbench: document.querySelector("#workbenchView"),
@@ -2257,6 +2493,7 @@
               : "金额冲突决策画布 · AI 记账 Agent";
     }
 
+    updateTaskState();
     window.addEventListener("hashchange", renderRoute);
     renderRoute();
   </script>
