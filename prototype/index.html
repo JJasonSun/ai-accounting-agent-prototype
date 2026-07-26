@@ -1,0 +1,2258 @@
+<!doctype html>
+<!-- 页面：客户工作台、任务详情、审核导出与三类人工处理详情；场景：从账套入口走通正常及异常闭环。 -->
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>金额冲突决策画布 · AI 记账 Agent</title>
+  <link rel="stylesheet" href="../tokens.css">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html,
+    body {
+      min-width: 20rem;
+      margin: 0;
+      overflow-x: clip;
+      background: var(--color-paper);
+      color: var(--color-ink);
+    }
+
+    body {
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      font-size: var(--text-md);
+      line-height: 1.55;
+      text-rendering: optimizeLegibility;
+    }
+
+    button { font: inherit; }
+
+    button,
+    [role="button"] {
+      min-height: 2.75rem;
+      white-space: nowrap;
+    }
+
+    button:focus-visible,
+    a:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible,
+    [tabindex]:focus-visible {
+      outline: 2px solid var(--color-focus);
+      outline-offset: 2px;
+    }
+
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline-offset: 1px;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    input:disabled,
+    select:disabled,
+    textarea:disabled {
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+
+    .app-shell {
+      min-height: 100dvh;
+      padding-block-end: 6.5rem;
+    }
+
+    .topbar {
+      position: sticky;
+      inset-block-start: 0;
+      z-index: 300;
+      display: grid;
+      gap: var(--space-sm);
+      padding: var(--space-xs) var(--space-sm);
+      border-block-end: 1px solid var(--color-rule);
+      background: var(--color-paper-raised);
+      box-shadow: var(--shadow-low);
+    }
+
+    .brand-context,
+    .task-context,
+    .context-fact,
+    .process-guide,
+    .agent-node,
+    .queue-item-head,
+    .evidence-source,
+    .confidence-row,
+    .decision-meta,
+    .audit-row,
+    .decision-bar-inner,
+    .action-group,
+    .status-line {
+      display: flex;
+      align-items: center;
+    }
+
+    .brand-context {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: var(--space-3xs);
+      min-width: 0;
+    }
+
+    .product-context { min-width: 0; }
+
+    .product-label {
+      display: block;
+      margin-block-end: var(--space-3xs);
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+      line-height: 1.2;
+    }
+
+    .product-mark {
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+      font-weight: 700;
+      letter-spacing: 0;
+      line-height: 1.35;
+    }
+
+    .product-mark::after {
+      content: "";
+      display: inline-block;
+      width: 0.4rem;
+      height: 0.4rem;
+      margin-inline-start: var(--space-2xs);
+      border-radius: 50%;
+      background: var(--color-accent);
+      vertical-align: 0.08rem;
+    }
+
+    .task-code,
+    .mono,
+    .confidence,
+    .amount,
+    .audit-time {
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .task-code {
+      overflow: hidden;
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .task-context {
+      flex-wrap: wrap;
+      gap: var(--space-2xs) var(--space-md);
+    }
+
+    .context-fact {
+      gap: var(--space-2xs);
+      min-width: 0;
+    }
+
+    .context-label {
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .context-value {
+      overflow: hidden;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .process-section {
+      border-block-end: 1px solid var(--color-rule);
+      background: var(--color-paper-sunken);
+    }
+
+    .process-guide {
+      align-items: flex-start;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--space-sm);
+      padding: var(--space-sm);
+    }
+
+    .process-guide-copy { min-width: 0; }
+
+    .process-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: var(--text-md);
+      line-height: 1.3;
+    }
+
+    .process-explanation {
+      max-width: 70ch;
+      margin: var(--space-3xs) 0 0;
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .process-current {
+      flex: 0 0 auto;
+      padding: var(--space-3xs) var(--space-2xs);
+      border: 1px solid var(--color-warning);
+      border-radius: var(--radius-xs);
+      color: var(--color-danger);
+      font-size: var(--text-xs);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .batch-rail {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      border-block-start: 1px solid var(--color-rule-soft);
+    }
+
+    .agent-node {
+      position: relative;
+      min-width: 0;
+      gap: var(--space-xs);
+      padding: var(--space-xs) var(--space-sm);
+      border-inline-end: 1px solid var(--color-rule-soft);
+    }
+
+    .agent-node:last-child { border-inline-end: 0; }
+
+    .agent-index {
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 1px solid var(--color-muted);
+      border-radius: 50%;
+      background: var(--color-paper-raised);
+      color: var(--color-ink-soft);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1;
+    }
+
+    .agent-node.is-complete .agent-index {
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+      color: var(--color-accent-ink);
+    }
+
+    .agent-node.is-active .agent-index {
+      border: 2px solid var(--color-warning);
+      background: var(--color-paper-raised);
+      color: var(--color-danger);
+    }
+
+    .agent-copy { min-width: 0; }
+
+    .agent-name {
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .agent-role {
+      overflow: hidden;
+      margin-block-start: var(--space-3xs);
+      color: var(--color-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .agent-state {
+      overflow: hidden;
+      margin-block-start: var(--space-3xs);
+      color: var(--color-ink-soft);
+      font-size: var(--text-xs);
+      line-height: 1.3;
+      text-overflow: ellipsis;
+    }
+
+    .workbench {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      min-height: calc(100dvh - 10rem);
+    }
+
+    .decision-queue {
+      min-width: 0;
+      border-block-end: 1px solid var(--color-rule);
+      background: var(--color-paper-raised);
+    }
+
+    .queue-heading {
+      margin: 0;
+      padding: var(--space-md) var(--space-sm) var(--space-xs);
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+      line-height: 1.2;
+    }
+
+    .queue-summary {
+      margin: 0;
+      padding: 0 var(--space-sm) var(--space-sm);
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .queue-list {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: minmax(15rem, 80vw);
+      gap: var(--space-2xs);
+      margin: 0;
+      padding: 0 var(--space-sm) var(--space-md);
+      overflow-x: auto;
+      list-style: none;
+      scrollbar-width: thin;
+    }
+
+    .queue-item {
+      min-width: 0;
+      padding: var(--space-sm);
+      border: 1px solid var(--color-rule-soft);
+      border-radius: var(--radius-sm);
+      background: var(--color-paper);
+    }
+
+    .queue-item.is-current {
+      border-color: var(--color-warning);
+      background: var(--color-warning-soft);
+    }
+
+    .queue-item-head {
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .risk-label {
+      color: var(--color-danger);
+      font-size: var(--text-xs);
+      font-weight: 700;
+    }
+
+    .queue-title {
+      margin: var(--space-xs) 0 var(--space-2xs);
+      font-size: var(--text-md);
+      line-height: 1.4;
+    }
+
+    .queue-detail {
+      margin: 0;
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .decision-canvas {
+      min-width: 0;
+      padding: var(--space-lg) var(--space-sm) var(--space-2xl);
+    }
+
+    .canvas-header {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-xs);
+      max-width: 62rem;
+      margin-inline: auto;
+    }
+
+    .case-status {
+      align-self: flex-start;
+      padding: var(--space-3xs) var(--space-2xs);
+      border: 1px solid var(--color-warning);
+      border-radius: var(--radius-xs);
+      color: var(--color-danger);
+      font-size: var(--text-xs);
+      font-weight: 700;
+    }
+
+    h1 {
+      min-width: 0;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.625rem, 1.4rem + 1vw, 2.5rem);
+      font-weight: 650;
+      letter-spacing: 0;
+      line-height: 1.12;
+      overflow-wrap: anywhere;
+    }
+
+    .case-lede {
+      max-width: 65ch;
+      margin: 0;
+      color: var(--color-ink-soft);
+      font-size: var(--text-md);
+    }
+
+    .evidence-stage {
+      position: relative;
+      display: grid;
+      gap: var(--space-sm);
+      max-width: 62rem;
+      margin: var(--space-lg) auto 0;
+    }
+
+    .evidence-card {
+      position: relative;
+      min-width: 0;
+      padding: var(--space-md);
+      border: 1px solid var(--color-rule);
+      border-radius: var(--radius-sm);
+      background: var(--color-paper-raised);
+      box-shadow: var(--shadow-low);
+    }
+
+    .evidence-card::after {
+      content: "";
+      position: absolute;
+      inset-inline-start: 50%;
+      inset-block-end: calc(var(--space-sm) * -1 - 1px);
+      width: 1px;
+      height: var(--space-sm);
+      background: var(--color-rule);
+    }
+
+    .evidence-source {
+      justify-content: space-between;
+      gap: var(--space-sm);
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .source-type {
+      color: var(--color-ink-soft);
+      font-weight: 700;
+    }
+
+    .amount {
+      display: block;
+      margin-block: var(--space-xs) var(--space-2xs);
+      font-family: var(--font-mono);
+      font-size: clamp(1.65rem, 1.4rem + 1vw, 2.25rem);
+      font-weight: 600;
+      letter-spacing: 0;
+      line-height: 1.1;
+    }
+
+    .evidence-field {
+      margin: 0;
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .confidence-row {
+      justify-content: space-between;
+      gap: var(--space-sm);
+      margin-block-start: var(--space-md);
+      padding-block-start: var(--space-xs);
+      border-block-start: 1px solid var(--color-rule-soft);
+      font-size: var(--text-xs);
+    }
+
+    .confidence { color: var(--color-ink-soft); }
+
+    .reasoning {
+      position: relative;
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: var(--space-sm) var(--space-md);
+      border: 1px solid var(--color-rule);
+      border-radius: var(--radius-sm);
+      background: var(--color-paper-sunken);
+    }
+
+    .reasoning::after {
+      content: "";
+      position: absolute;
+      inset-inline-start: 50%;
+      inset-block-end: calc(var(--space-sm) * -1 - 1px);
+      width: 1px;
+      height: var(--space-sm);
+      background: var(--color-rule);
+    }
+
+    .reasoning-title {
+      margin: 0 0 var(--space-2xs);
+      font-size: var(--text-sm);
+    }
+
+    .reasoning-copy {
+      margin: 0;
+      color: var(--color-ink-soft);
+      font-size: var(--text-sm);
+    }
+
+    .decision-panel {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: var(--space-md);
+      border: 1px solid var(--color-ink-soft);
+      border-radius: var(--radius-sm);
+      background: var(--color-paper-raised);
+    }
+
+    .decision-panel h2 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: var(--text-lg);
+      line-height: 1.25;
+    }
+
+    .decision-help {
+      margin: var(--space-2xs) 0 var(--space-sm);
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .decision-options {
+      display: grid;
+      gap: var(--space-2xs);
+    }
+
+    .decision-option {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: var(--space-xs);
+      min-height: 3.5rem;
+      padding: var(--space-xs) var(--space-sm);
+      border: 1px solid var(--color-rule);
+      border-radius: var(--radius-sm);
+      background: var(--color-paper);
+      cursor: pointer;
+      transition: background-color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
+    }
+
+    .decision-option input {
+      width: 1rem;
+      height: 1rem;
+      margin: 0;
+      accent-color: var(--color-accent);
+    }
+
+    .decision-option:has(input:checked) {
+      border-color: var(--color-accent);
+      background: var(--color-success-soft);
+    }
+
+    .option-source {
+      min-width: 0;
+      font-size: var(--text-sm);
+      font-weight: 600;
+    }
+
+    .option-amount {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .decision-meta {
+      justify-content: space-between;
+      gap: var(--space-sm);
+      margin-block-start: var(--space-sm);
+      padding-block-start: var(--space-sm);
+      border-block-start: 1px solid var(--color-rule-soft);
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .audit-trail {
+      max-width: 62rem;
+      margin: var(--space-lg) auto 0;
+      padding-block-start: var(--space-md);
+      border-block-start: 1px solid var(--color-rule);
+    }
+
+    .audit-heading {
+      margin: 0 0 var(--space-sm);
+      font-family: var(--font-display);
+      font-size: var(--text-sm);
+    }
+
+    .audit-list {
+      display: grid;
+      gap: var(--space-xs);
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .audit-row {
+      align-items: flex-start;
+      gap: var(--space-xs);
+      font-size: var(--text-xs);
+    }
+
+    .audit-time {
+      flex: 0 0 4.25rem;
+      color: var(--color-muted);
+    }
+
+    .audit-mark {
+      flex: 0 0 auto;
+      width: 0.5rem;
+      height: 0.5rem;
+      margin-block-start: 0.35rem;
+      border: 1px solid var(--color-muted);
+      border-radius: 50%;
+      background: var(--color-paper-raised);
+    }
+
+    .audit-row.is-new .audit-mark {
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+    }
+
+    .audit-copy { color: var(--color-ink-soft); }
+    .audit-copy strong { color: var(--color-ink); }
+
+    .decision-bar {
+      position: fixed;
+      inset-inline: 0;
+      inset-block-end: 0;
+      z-index: 250;
+      padding: var(--space-xs) max(var(--space-sm), env(safe-area-inset-right)) max(var(--space-xs), env(safe-area-inset-bottom)) max(var(--space-sm), env(safe-area-inset-left));
+      border-block-start: 1px solid var(--color-rule);
+      background: var(--color-paper-raised);
+      box-shadow: var(--shadow-float);
+    }
+
+    .decision-bar-inner {
+      max-width: 76rem;
+      margin-inline: auto;
+      justify-content: space-between;
+      gap: var(--space-sm);
+    }
+
+    .status-line {
+      min-width: 0;
+      gap: var(--space-xs);
+    }
+
+    .status-indicator {
+      flex: 0 0 auto;
+      width: 0.55rem;
+      height: 0.55rem;
+      border-radius: 50%;
+      background: var(--color-warning);
+    }
+
+    .status-copy { min-width: 0; }
+
+    .status-title {
+      overflow: hidden;
+      font-size: var(--text-sm);
+      font-weight: 700;
+      line-height: 1.3;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .status-detail {
+      display: none;
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .action-group { gap: var(--space-2xs); }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 7rem;
+      padding: var(--space-2xs) var(--space-sm);
+      border: 1px solid var(--color-ink-soft);
+      border-radius: var(--radius-sm);
+      background: var(--color-paper-raised);
+      color: var(--color-ink);
+      cursor: pointer;
+      font-weight: 700;
+      transition: background-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), transform var(--dur-instant) var(--ease-out);
+    }
+
+    .button:active { transform: translateY(1px); }
+
+    .button-primary {
+      border-color: var(--color-accent);
+      background: var(--color-accent);
+      color: var(--color-accent-ink);
+    }
+
+    .button[hidden] { display: none; }
+
+    .page-view[hidden] { display: none; }
+
+    .home-shell,
+    .task-shell {
+      min-height: 100dvh;
+      padding: var(--space-lg) var(--space-sm) var(--space-2xl);
+    }
+
+    .home-inner,
+    .task-inner {
+      max-width: 76rem;
+      margin-inline: auto;
+    }
+
+    .section-kicker {
+      margin: 0 0 var(--space-xs);
+      color: var(--color-muted);
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .page-heading {
+      max-width: 44rem;
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.75rem, 1.35rem + 1.5vw, 3rem);
+      line-height: 1.08;
+      text-wrap: pretty;
+    }
+
+    .page-intro {
+      max-width: 58ch;
+      margin: var(--space-sm) 0 0;
+      color: var(--color-ink-soft);
+      font-size: var(--text-md);
+      text-wrap: pretty;
+    }
+
+    .home-header,
+    .task-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-lg);
+      padding-block-end: var(--space-lg);
+      border-block-end: 1px solid var(--color-rule);
+    }
+
+    .home-header-actions,
+    .task-header-actions { display: flex; gap: var(--space-2xs); flex-wrap: wrap; }
+
+    .client-list {
+      display: grid;
+      gap: var(--space-2xs);
+      margin-block-start: var(--space-lg);
+    }
+
+    .client-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(10rem, 0.8fr) minmax(11rem, 0.9fr) auto;
+      align-items: center;
+      gap: var(--space-md);
+      padding: var(--space-md);
+      border: 1px solid var(--color-rule);
+      background: var(--color-paper-raised);
+      color: inherit;
+      text-decoration: none;
+      transition: border-color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out), transform var(--dur-instant) var(--ease-out);
+    }
+
+    .client-row:hover { border-color: var(--color-accent); background: var(--color-paper); transform: translateY(-1px); }
+    .client-row:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 3px; }
+
+    .client-name { margin: 0; font-size: var(--text-lg); line-height: 1.3; }
+    .client-meta { margin: var(--space-3xs) 0 0; color: var(--color-muted); font-size: var(--text-xs); }
+
+    .client-state { display: flex; align-items: center; gap: var(--space-2xs); font-size: var(--text-sm); font-weight: 700; }
+    .state-dot { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--color-accent); }
+    .state-dot.is-warning { background: var(--color-warning); }
+
+    .client-counts { display: flex; gap: var(--space-md); }
+    .count-block { display: grid; gap: var(--space-3xs); }
+    .count-label { color: var(--color-muted); font-size: var(--text-xs); }
+    .count-value { font-family: var(--font-mono); font-size: var(--text-lg); font-weight: 700; }
+    .row-arrow { color: var(--color-accent); font-family: var(--font-mono); font-size: var(--text-lg); }
+
+    .task-shell { background: var(--color-paper-sunken); }
+    .task-header { align-items: flex-start; }
+    .task-title { margin: 0; font-family: var(--font-display); font-size: clamp(1.5rem, 1.2rem + 1vw, 2.25rem); line-height: 1.12; }
+    .task-meta { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-block-start: var(--space-xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .task-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(16rem, 0.8fr); gap: var(--space-md); margin-block-start: var(--space-lg); }
+    .task-card { min-width: 0; padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
+    .task-card-wide { grid-column: 1 / -1; }
+    .task-card h2 { margin: 0 0 var(--space-sm); font-family: var(--font-display); font-size: var(--text-lg); }
+    .task-card p { margin: 0; color: var(--color-ink-soft); font-size: var(--text-sm); }
+    .task-progress { display: grid; gap: var(--space-xs); }
+    .progress-line { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); font-size: var(--text-sm); }
+    .progress-track { height: 0.45rem; background: var(--color-rule-soft); }
+    .progress-fill { width: 86%; height: 100%; background: var(--color-accent); }
+    .task-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); margin-block-start: var(--space-md); }
+    .task-stat { padding: var(--space-sm); border-block-start: 2px solid var(--color-rule); background: var(--color-paper); }
+    .task-stat.is-warning { border-color: var(--color-warning); }
+    .task-stat.is-danger { border-color: var(--color-danger); }
+    .task-stat-label { color: var(--color-muted); font-size: var(--text-xs); }
+    .task-stat-value { display: block; margin-block-start: var(--space-3xs); font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 700; }
+    .task-steps { display: grid; gap: var(--space-2xs); }
+    .task-step { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; align-items: center; gap: var(--space-xs); padding-block: var(--space-xs); border-block-end: 1px solid var(--color-rule-soft); }
+    .task-step:last-child { border-block-end: 0; }
+    .step-number { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1px solid var(--color-muted); border-radius: 50%; font-family: var(--font-mono); font-size: var(--text-xs); }
+    .task-step.is-done .step-number { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
+    .task-step-title { font-size: var(--text-sm); font-weight: 700; }
+    .task-step-note { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .step-status { color: var(--color-muted); font-size: var(--text-xs); white-space: nowrap; }
+    .exception-list { display: grid; gap: var(--space-2xs); margin: 0; padding: 0; list-style: none; }
+    .exception-link { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-xs); padding: var(--space-sm); border: 1px solid var(--color-rule); color: inherit; text-decoration: none; }
+    a.exception-link:hover { border-color: var(--color-warning); background: var(--color-warning-soft); }
+    .exception-link.is-primary { border-color: var(--color-accent); background: var(--color-success-soft); }
+    a.exception-link.is-primary:hover { border-color: var(--color-accent-hover); background: var(--color-paper); }
+    .exception-link.is-resolved { border-color: var(--color-accent); background: var(--color-success-soft); }
+    .exception-link.is-resolved .exception-label { color: var(--color-accent-hover); }
+    .exception-label { color: var(--color-danger); font-size: var(--text-xs); font-weight: 700; }
+    .exception-label.is-batch { color: var(--color-accent-hover); }
+    .exception-copy strong { display: block; font-size: var(--text-sm); }
+    .exception-copy span { display: block; margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .todo-state { color: var(--color-muted); font-size: var(--text-xs); font-weight: 700; white-space: nowrap; }
+    a.exception-link .todo-state { color: var(--color-accent-hover); }
+    .task-footer-note { margin-block-start: var(--space-lg); color: var(--color-muted); font-size: var(--text-xs); }
+
+    .exception-detail-shell {
+      min-height: 100dvh;
+      padding: var(--space-lg) var(--space-sm) var(--space-2xl);
+      background: var(--color-paper-sunken);
+    }
+
+    .exception-detail-inner { max-width: 72rem; margin-inline: auto; }
+    .exception-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-lg); padding-block-end: var(--space-lg); border-block-end: 1px solid var(--color-rule); }
+    .exception-detail-title { margin: 0; font-family: var(--font-display); font-size: clamp(1.6rem, 1.25rem + 1.2vw, 2.5rem); line-height: 1.1; text-wrap: pretty; }
+    .exception-detail-meta { display: flex; gap: var(--space-sm); flex-wrap: wrap; margin-block-start: var(--space-xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .exception-detail-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr); gap: var(--space-md); margin-block-start: var(--space-lg); }
+    .exception-detail-card { min-width: 0; padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
+    .exception-detail-card h2 { margin: 0 0 var(--space-sm); font-family: var(--font-display); font-size: var(--text-lg); }
+    .exception-detail-card p { margin: 0; color: var(--color-ink-soft); font-size: var(--text-sm); }
+    .exception-reason { margin-block-end: var(--space-md); padding: var(--space-sm); border: 1px solid var(--color-warning); background: var(--color-warning-soft); }
+    .exception-reason strong { display: block; font-size: var(--text-sm); }
+    .exception-reason p { margin-block-start: var(--space-3xs); font-size: var(--text-xs); }
+    .fact-list { display: grid; gap: 0; margin: 0; }
+    .fact-row { display: grid; grid-template-columns: minmax(8rem, 0.6fr) minmax(0, 1.4fr) auto; gap: var(--space-sm); align-items: start; padding-block: var(--space-sm); border-block-end: 1px solid var(--color-rule-soft); }
+    .fact-row:last-child { border-block-end: 0; }
+    .fact-row dt { color: var(--color-muted); font-size: var(--text-xs); }
+    .fact-row dd { margin: 0; font-size: var(--text-sm); font-weight: 700; }
+    .fact-confidence { color: var(--color-ink-soft); font-family: var(--font-mono); font-size: var(--text-xs); white-space: nowrap; }
+    .exception-action { display: grid; gap: var(--space-sm); }
+    .subject-options { display: grid; gap: var(--space-2xs); }
+    .subject-option { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-xs); padding: var(--space-sm); border: 1px solid var(--color-rule); background: var(--color-paper); cursor: pointer; }
+    .subject-option:has(input:checked) { border-color: var(--color-accent); background: var(--color-success-soft); }
+    .subject-option input { width: 1rem; height: 1rem; margin: 0; accent-color: var(--color-accent); }
+    .subject-copy strong { display: block; font-size: var(--text-sm); }
+    .subject-copy span { display: block; margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .subject-confidence { font-family: var(--font-mono); font-size: var(--text-xs); font-weight: 700; }
+    .exception-action label.field-label { display: grid; gap: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .exception-action textarea { width: 100%; min-height: 5rem; padding: var(--space-2xs); border: 1px solid var(--color-rule); border-radius: var(--radius-xs); background: var(--color-paper); color: var(--color-ink); font: inherit; font-size: var(--text-sm); resize: vertical; }
+    .exception-impact { padding: var(--space-sm); border-block-start: 1px solid var(--color-rule); border-block-end: 1px solid var(--color-rule); color: var(--color-muted); font-size: var(--text-xs); }
+    .exception-action-status { min-height: 2.5rem; margin: 0; color: var(--color-muted); font-size: var(--text-xs); }
+    .exception-action-status.is-success { color: var(--color-accent-hover); font-weight: 700; }
+    .risk-checks { display: grid; gap: var(--space-2xs); }
+    .risk-check { display: flex; align-items: flex-start; gap: var(--space-2xs); color: var(--color-ink-soft); font-size: var(--text-xs); }
+    .risk-check input { flex: 0 0 auto; margin-block-start: 0.15rem; accent-color: var(--color-accent); }
+    .exception-record { margin-block-start: var(--space-md); padding: var(--space-sm); border: 1px solid var(--color-rule); background: var(--color-paper); color: var(--color-ink-soft); font-size: var(--text-xs); }
+    .exception-record[hidden] { display: none; }
+
+    .review-shell,
+    .complete-shell {
+      min-height: 100dvh;
+      padding: var(--space-lg) var(--space-sm) var(--space-2xl);
+      background: var(--color-paper-sunken);
+    }
+
+    .review-inner,
+    .complete-inner {
+      max-width: 76rem;
+      margin-inline: auto;
+    }
+
+    .review-header,
+    .complete-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-lg);
+      padding-block-end: var(--space-lg);
+      border-block-end: 1px solid var(--color-rule);
+    }
+
+    .review-title,
+    .complete-title {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: clamp(1.6rem, 1.25rem + 1.2vw, 2.5rem);
+      line-height: 1.1;
+      text-wrap: pretty;
+    }
+
+    .review-meta,
+    .complete-meta {
+      display: flex;
+      gap: var(--space-sm);
+      flex-wrap: wrap;
+      margin-block-start: var(--space-xs);
+      color: var(--color-muted);
+      font-size: var(--text-xs);
+    }
+
+    .review-actions,
+    .complete-actions { display: flex; gap: var(--space-2xs); flex-wrap: wrap; }
+
+    .review-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) repeat(3, minmax(7rem, 0.55fr));
+      gap: var(--space-2xs);
+      margin-block-start: var(--space-lg);
+    }
+
+    .review-summary-card {
+      padding: var(--space-sm);
+      border: 1px solid var(--color-rule);
+      background: var(--color-paper-raised);
+    }
+
+    .review-summary-card.is-primary { border-color: var(--color-accent); }
+    .review-summary-label { color: var(--color-muted); font-size: var(--text-xs); }
+    .review-summary-value { display: block; margin-block-start: var(--space-3xs); font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 700; }
+    .review-summary-copy { margin: var(--space-3xs) 0 0; color: var(--color-ink-soft); font-size: var(--text-xs); }
+
+    .review-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
+      gap: var(--space-md);
+      margin-block-start: var(--space-md);
+    }
+
+    .review-card {
+      min-width: 0;
+      padding: var(--space-md);
+      border: 1px solid var(--color-rule);
+      background: var(--color-paper-raised);
+    }
+
+    .review-card h2 { margin: 0 0 var(--space-sm); font-family: var(--font-display); font-size: var(--text-lg); }
+    .review-help { margin: 0 0 var(--space-sm); color: var(--color-muted); font-size: var(--text-xs); }
+
+    .draft-list { display: grid; gap: var(--space-2xs); margin: 0; padding: 0; list-style: none; }
+    .draft-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-xs); align-items: start; padding: var(--space-sm); border: 1px solid var(--color-rule-soft); background: var(--color-paper); }
+    .draft-row.is-expanded { border-color: var(--color-accent); background: var(--color-success-soft); }
+    .draft-row input { width: 1rem; height: 1rem; margin-block-start: 0.2rem; accent-color: var(--color-accent); }
+    .draft-name { font-size: var(--text-sm); font-weight: 700; }
+    .draft-detail { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .draft-amount { font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 700; white-space: nowrap; }
+    .draft-evidence { grid-column: 2 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); margin-block-start: var(--space-2xs); padding-block-start: var(--space-2xs); border-block-start: 1px solid var(--color-rule); }
+    .draft-evidence span { display: block; color: var(--color-muted); font-size: var(--text-xs); }
+    .draft-evidence strong { display: block; margin-block-start: var(--space-3xs); font-size: var(--text-xs); }
+    .draft-controls { grid-column: 2 / -1; display: flex; gap: var(--space-2xs); flex-wrap: wrap; margin-block-start: var(--space-2xs); }
+    .draft-controls .button { min-height: 2.25rem; min-width: auto; padding: var(--space-3xs) var(--space-xs); font-size: var(--text-xs); }
+    .draft-edit-panel { grid-column: 2 / -1; display: grid; gap: var(--space-2xs); margin-block-start: var(--space-2xs); padding: var(--space-sm); border-block-start: 1px solid var(--color-rule); background: var(--color-paper-raised); }
+    .draft-edit-panel[hidden] { display: none; }
+    .draft-edit-panel label { display: grid; gap: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .draft-edit-panel select,
+    .draft-edit-panel input,
+    .draft-edit-panel textarea { width: 100%; min-height: 2.5rem; padding: var(--space-2xs); border: 1px solid var(--color-rule); border-radius: var(--radius-xs); background: var(--color-paper); color: var(--color-ink); font: inherit; font-size: var(--text-sm); }
+    .draft-edit-panel textarea { min-height: 4.5rem; resize: vertical; }
+    .draft-edit-actions { display: flex; gap: var(--space-2xs); flex-wrap: wrap; }
+    .draft-edit-actions .button { min-height: 2.35rem; min-width: auto; font-size: var(--text-xs); }
+    .draft-row.is-modified { border-color: var(--color-warning); background: var(--color-warning-soft); }
+    .draft-row.is-rejected { border-color: var(--color-danger); background: var(--color-danger-soft); }
+    .draft-change-record { grid-column: 2 / -1; padding: var(--space-xs); border: 1px solid var(--color-rule); background: var(--color-paper-raised); color: var(--color-ink-soft); font-size: var(--text-xs); }
+    .draft-change-record[hidden] { display: none; }
+    .draft-change-record strong { color: var(--color-ink); }
+
+    .review-decision { display: grid; gap: var(--space-sm); }
+    .decision-callout { padding: var(--space-sm); border-inline-start: 3px solid var(--color-accent); background: var(--color-success-soft); }
+    .decision-callout strong { display: block; font-size: var(--text-sm); }
+    .decision-callout p { margin: var(--space-3xs) 0 0; color: var(--color-ink-soft); font-size: var(--text-xs); }
+    .review-checks { display: grid; gap: var(--space-2xs); }
+    .review-check { display: flex; align-items: flex-start; gap: var(--space-2xs); color: var(--color-ink-soft); font-size: var(--text-xs); }
+    .review-check input { flex: 0 0 auto; margin-block-start: 0.15rem; accent-color: var(--color-accent); }
+    .review-submit { width: 100%; }
+    .review-status { min-height: 2.5rem; margin: 0; color: var(--color-muted); font-size: var(--text-xs); }
+    .review-status.is-success { color: var(--color-accent-hover); font-weight: 700; }
+
+    .complete-result {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+      gap: var(--space-md);
+      margin-block-start: var(--space-lg);
+    }
+
+    .complete-card { min-width: 0; padding: var(--space-lg); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
+    .complete-card h2 { margin: 0 0 var(--space-sm); font-family: var(--font-display); font-size: var(--text-lg); }
+    .complete-card p { margin: 0; color: var(--color-ink-soft); font-size: var(--text-sm); }
+    .complete-mark { display: grid; place-items: center; width: 2.25rem; height: 2.25rem; margin-block-end: var(--space-sm); border-radius: 50%; background: var(--color-accent); color: var(--color-accent-ink); font-family: var(--font-mono); font-weight: 700; }
+    .complete-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2xs); margin-block-start: var(--space-md); }
+    .complete-stat { padding: var(--space-sm); border-block-start: 2px solid var(--color-rule); background: var(--color-paper); }
+    .complete-stat.is-warning { border-color: var(--color-warning); }
+    .complete-stat-label { color: var(--color-muted); font-size: var(--text-xs); }
+    .complete-stat-value { display: block; margin-block-start: var(--space-3xs); font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 700; }
+    .complete-timeline { display: grid; gap: var(--space-xs); margin: 0; padding: 0; list-style: none; }
+    .complete-timeline li { display: grid; grid-template-columns: 4.5rem minmax(0, 1fr); gap: var(--space-xs); padding-block-end: var(--space-xs); border-block-end: 1px solid var(--color-rule-soft); font-size: var(--text-xs); }
+    .complete-timeline li:last-child { border-block-end: 0; }
+    .complete-timeline time { color: var(--color-muted); font-family: var(--font-mono); }
+    .complete-note { margin-block-start: var(--space-lg); color: var(--color-muted); font-size: var(--text-xs); }
+
+    .create-shell {
+      min-height: 100dvh;
+      padding: var(--space-lg) var(--space-sm) var(--space-2xl);
+      background: var(--color-paper-sunken);
+    }
+
+    .create-inner { max-width: 64rem; margin-inline: auto; }
+    .create-header { padding-block-end: var(--space-lg); border-block-end: 1px solid var(--color-rule); }
+    .create-title { margin: 0; font-family: var(--font-display); font-size: clamp(1.75rem, 1.35rem + 1.4vw, 2.75rem); line-height: 1.08; text-wrap: pretty; }
+    .create-intro { max-width: 58ch; margin: var(--space-sm) 0 0; color: var(--color-ink-soft); font-size: var(--text-md); }
+    .create-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(16rem, 0.65fr); gap: var(--space-md); margin-block-start: var(--space-lg); }
+    .create-card { min-width: 0; padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
+    .create-card h2 { margin: 0 0 var(--space-sm); font-family: var(--font-display); font-size: var(--text-lg); }
+    .create-fields { display: grid; gap: var(--space-sm); }
+    .create-field { display: grid; gap: var(--space-3xs); }
+    .create-field label { color: var(--color-muted); font-size: var(--text-xs); }
+    .create-field input { width: 100%; min-height: 2.75rem; padding: var(--space-2xs) var(--space-xs); border: 1px solid var(--color-rule); border-radius: var(--radius-xs); background: var(--color-paper); color: var(--color-ink); font: inherit; font-size: var(--text-sm); }
+    .create-field input:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 1px; }
+    .file-list { display: grid; gap: var(--space-2xs); margin: 0; padding: 0; list-style: none; }
+    .file-group { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); padding: var(--space-sm); border: 1px solid var(--color-rule-soft); background: var(--color-paper); }
+    .file-group strong { font-size: var(--text-sm); }
+    .file-group span { color: var(--color-muted); font-family: var(--font-mono); font-size: var(--text-xs); }
+    .create-note { margin: var(--space-sm) 0 0; color: var(--color-muted); font-size: var(--text-xs); }
+    .create-actions { display: flex; gap: var(--space-2xs); flex-wrap: wrap; margin-block-start: var(--space-lg); }
+
+    @media (min-width: 40rem) {
+      .home-shell,
+      .task-shell { padding: var(--space-xl) var(--space-md) var(--space-2xl); }
+    }
+
+    @media (max-width: 48rem) {
+      .home-header,
+      .task-header { align-items: flex-start; flex-direction: column; }
+      .client-row { grid-template-columns: minmax(0, 1fr) auto; }
+      .client-counts { grid-column: 1 / -1; }
+      .row-arrow { grid-column: 2; grid-row: 1; }
+      .task-grid { grid-template-columns: 1fr; }
+      .review-header,
+      .complete-header { flex-direction: column; }
+      .review-summary,
+      .review-layout,
+      .complete-result,
+      .create-grid,
+      .exception-detail-grid { grid-template-columns: 1fr; }
+      .exception-detail-header { flex-direction: column; }
+    }
+
+    @media (max-width: 30rem) {
+      .task-stats { grid-template-columns: 1fr; }
+      .client-counts { gap: var(--space-sm); }
+      .draft-evidence { grid-template-columns: 1fr; }
+      .complete-stats { grid-template-columns: 1fr; }
+      .fact-row { grid-template-columns: 1fr; gap: var(--space-3xs); }
+    }
+
+    .spinner {
+      display: none;
+      width: 0.8rem;
+      height: 0.8rem;
+      margin-inline-end: var(--space-2xs);
+      border: 2px solid var(--color-rule);
+      border-block-start-color: var(--color-accent-ink);
+      border-radius: 50%;
+      vertical-align: -0.1rem;
+      animation: spin 800ms linear infinite;
+    }
+
+    .button.is-loading .spinner { display: inline-block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (hover: hover) and (pointer: fine) {
+      .decision-option:hover { background: var(--color-paper-sunken); }
+      .button:hover { background: var(--color-ink); color: var(--color-paper); }
+      .button-primary:hover { background: var(--color-accent-hover); color: var(--color-accent-ink); }
+    }
+
+    @media (min-width: 40rem) {
+      .topbar {
+        grid-template-columns: minmax(12rem, 0.8fr) minmax(0, 2fr);
+        align-items: center;
+        padding-inline: var(--space-md);
+      }
+
+      .task-context { justify-content: flex-end; }
+
+      .process-guide {
+        align-items: center;
+        flex-direction: row;
+        padding-inline: var(--space-md);
+      }
+
+      .batch-rail { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+      .evidence-stage {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .reasoning,
+      .decision-panel { grid-column: 1 / -1; }
+
+      .status-detail { display: block; }
+    }
+
+    @media (min-width: 60rem) {
+      .app-shell { padding-block-end: 5.5rem; }
+
+      .topbar { padding-inline: var(--space-lg); }
+
+      .process-guide { padding-inline: var(--space-lg); }
+
+      .batch-rail { padding-inline: var(--space-lg); }
+
+      .workbench {
+        grid-template-columns: 17rem minmax(0, 1fr);
+        min-height: calc(100dvh - 7.75rem);
+      }
+
+      .decision-queue {
+        border-inline-end: 1px solid var(--color-rule);
+        border-block-end: 0;
+      }
+
+      .queue-heading { padding: var(--space-lg) var(--space-md) var(--space-xs); }
+      .queue-summary { padding-inline: var(--space-md); }
+
+      .queue-list {
+        grid-auto-flow: row;
+        grid-auto-columns: auto;
+        padding: 0 var(--space-md) var(--space-lg);
+        overflow-x: visible;
+      }
+
+      .decision-canvas { padding: var(--space-xl) var(--space-lg) var(--space-2xl); }
+    }
+
+    @media (min-width: 90rem) {
+      .decision-canvas { padding-inline: var(--space-2xl); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="page-view home-shell" id="workbenchView" aria-labelledby="workbenchTitle">
+    <div class="home-inner">
+      <header class="home-header">
+        <div>
+          <p class="section-kicker">AI 记账 Agent · 客户工作台</p>
+          <h1 class="page-heading" id="workbenchTitle">先处理本月需要会计介入的账套</h1>
+          <p class="page-intro">每一行代表一个客户账套。进入账套后，可以查看本月资料处理进度、待审核草稿和需要逐项处理的异常。</p>
+        </div>
+        <div class="home-header-actions">
+          <a class="button" href="#new-task">新建记账任务</a>
+        </div>
+      </header>
+
+      <div class="client-list" aria-label="客户账套列表">
+        <a class="client-row" href="#task/TASK-2026-07-024">
+          <div>
+            <h2 class="client-name">云帆科技（上海）有限公司</h2>
+            <p class="client-meta">2026 年 7 月 · TASK-2026-07-024 · 23 份资料形成 21 个处理项</p>
+          </div>
+          <div class="client-state"><span class="state-dot is-warning" aria-hidden="true"></span>等待会计处理</div>
+          <div class="client-counts" aria-label="任务处理数量">
+            <span class="count-block"><span class="count-label">待批量审核</span><span class="count-value">18</span></span>
+            <span class="count-block"><span class="count-label">待确认</span><span class="count-value" id="workbenchConfirmCount">0</span></span>
+            <span class="count-block"><span class="count-label">人工处理中</span><span class="count-value" id="workbenchManualCount">3</span></span>
+          </div>
+          <span class="row-arrow" aria-hidden="true">→</span>
+        </a>
+
+        <div class="client-row" aria-label="澄明商贸账套">
+          <div>
+            <h2 class="client-name">澄明商贸有限公司</h2>
+            <p class="client-meta">2026 年 7 月 · 资料接收中</p>
+          </div>
+          <div class="client-state"><span class="state-dot" aria-hidden="true"></span>等待补充资料</div>
+          <div class="client-counts">
+            <span class="count-block"><span class="count-label">已接收资料</span><span class="count-value">12</span></span>
+          </div>
+          <span class="row-arrow" aria-hidden="true">—</span>
+        </div>
+
+        <div class="client-row" aria-label="远川设计账套">
+          <div>
+            <h2 class="client-name">远川设计事务所</h2>
+            <p class="client-meta">2026 年 6 月 · 已完成</p>
+          </div>
+          <div class="client-state"><span class="state-dot" aria-hidden="true"></span>凭证已导出</div>
+          <div class="client-counts">
+            <span class="count-block"><span class="count-label">待处理</span><span class="count-value">0</span></span>
+          </div>
+          <span class="row-arrow" aria-hidden="true">—</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-view create-shell" id="createView" aria-labelledby="createTitle" hidden>
+    <div class="create-inner">
+      <header class="create-header">
+        <p class="section-kicker">新建记账任务</p>
+        <h1 class="create-title" id="createTitle">选择账套和会计期间，确认本次要处理的资料</h1>
+        <p class="create-intro">任务开始后，AI 会依次识别资料、匹配银行流水并生成凭证草稿。金额冲突、低置信度和高金额项目会交给会计处理。</p>
+      </header>
+
+      <div class="create-grid">
+        <section class="create-card" aria-labelledby="taskInfoTitle">
+          <h2 id="taskInfoTitle">任务信息</h2>
+          <div class="create-fields">
+            <div class="create-field"><label for="clientAccount">客户账套</label><input id="clientAccount" value="云帆科技（上海）有限公司" readonly></div>
+            <div class="create-field"><label for="accountingPeriod">会计期间</label><input id="accountingPeriod" value="2026 年 7 月" readonly></div>
+            <div class="create-field"><label for="taskOwner">负责会计</label><input id="taskOwner" value="陈妍" readonly></div>
+          </div>
+        </section>
+
+        <section class="create-card" aria-labelledby="filesTitle">
+          <h2 id="filesTitle">已准备 23 项资料</h2>
+          <ul class="file-list">
+            <li class="file-group"><strong>发票</strong><span>12 份</span></li>
+            <li class="file-group"><strong>银行流水</strong><span>8 笔</span></li>
+            <li class="file-group"><strong>费用单据</strong><span>3 张</span></li>
+          </ul>
+          <p class="create-note">演示资料均为虚构数据。开始后可以在任务详情中查看每一步进度和处理结果。</p>
+        </section>
+      </div>
+
+      <div class="create-actions">
+        <a class="button" href="#workbench">取消并返回</a>
+        <a class="button button-primary" href="#task/TASK-2026-07-024">创建任务并开始处理</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-view task-shell" id="taskView" aria-labelledby="taskTitle" hidden>
+    <div class="task-inner">
+      <header class="task-header">
+        <div>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 2026 年 7 月</p>
+          <h1 class="task-title" id="taskTitle">18 份草稿待批量审核，3 项异常待处理</h1>
+          <div class="task-meta">
+            <span class="mono">TASK-2026-07-024</span>
+            <span>23 份资料 · 21 个记账处理项</span>
+            <span id="taskUpdated">最后更新 10:23</span>
+          </div>
+        </div>
+        <div class="task-header-actions">
+          <a class="button" href="#workbench">返回客户工作台</a>
+          <a class="button" href="#new-task">补充或新增资料</a>
+        </div>
+      </header>
+
+      <div class="task-grid">
+        <section class="task-card task-card-wide" aria-labelledby="stepsTitle">
+          <h2 id="stepsTitle">业务处理步骤</h2>
+          <div class="task-steps">
+            <div class="task-step is-done"><span class="step-number">1</span><div><div class="task-step-title">识别并整理资料</div><div class="task-step-note">DocumentAgent · 已识别 23 项资料</div></div><span class="step-status">已完成</span></div>
+            <div class="task-step is-done"><span class="step-number">2</span><div><div class="task-step-title">匹配银行流水</div><div class="task-step-note" id="taskMatchingNote">MatchingAgent · 正常项已完成，发现 1 项金额冲突</div></div><span class="step-status" id="taskMatchingStatus">正常项已完成</span></div>
+            <div class="task-step"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 已生成 18 份草稿，异常项等待处理</div></div><span class="step-status" id="taskVoucherStatus">已生成 18 份</span></div>
+            <div class="task-step"><span class="step-number">4</span><div><div class="task-step-title">会计审核并导出</div><div class="task-step-note">所有草稿必须由会计批准；AI 不会写入正式账簿</div></div><span class="step-status">等待会计审核</span></div>
+          </div>
+        </section>
+
+        <section class="task-card" aria-labelledby="progressCardTitle">
+          <h2 id="progressCardTitle">处理结果概览</h2>
+          <div class="task-progress">
+            <div class="progress-line"><span id="taskProgressCopy">AI 已识别 23 份资料并形成 21 个处理项，其中 18 项可以进入批量审核</span><strong class="mono" id="taskProgressValue">18 / 21 项</strong></div>
+            <div class="progress-track" id="taskProgressTrack" aria-label="任务处理进度 86%"><div class="progress-fill" id="taskProgressFill"></div></div>
+          </div>
+          <div class="task-stats">
+            <div class="task-stat"><span class="task-stat-label">待批量审核</span><strong class="task-stat-value">18</strong></div>
+            <div class="task-stat is-warning"><span class="task-stat-label">需要确认</span><strong class="task-stat-value" id="taskConfirmCount">0</strong></div>
+            <div class="task-stat is-danger"><span class="task-stat-label">必须人工处理</span><strong class="task-stat-value" id="taskManualCount">3</strong></div>
+          </div>
+        </section>
+
+        <section class="task-card" aria-labelledby="todoTitle">
+          <h2 id="todoTitle">待办事项</h2>
+          <ul class="exception-list">
+            <li><a class="exception-link is-primary" href="#review/TASK-2026-07-024"><span class="exception-label is-batch">批量审核</span><span class="exception-copy"><strong>18 份凭证草稿</strong><span>均无异常，识别、匹配和科目推荐置信度均不低于 85%</span></span><span class="todo-state">去审核 →</span></a></li>
+            <li><a class="exception-link" href="#conflict/ITEM-009" id="taskConflictLink"><span class="exception-label" id="taskConflictLabel">金额冲突</span><span class="exception-copy"><strong>上海恒际云服务有限公司</strong><span id="taskConflictCopy">发票与流水相差 ¥200.00，需确认正确金额</span></span><span class="todo-state" id="taskConflictState">去处理 →</span></a></li>
+            <li><a class="exception-link" href="#low-confidence/ITEM-014"><span class="exception-label">低置信度</span><span class="exception-copy"><strong>差旅费报销单</strong><span>科目推荐置信度 57%，需人工选择</span></span><span class="todo-state">去处理 →</span></a></li>
+            <li><a class="exception-link" href="#high-amount/ITEM-021"><span class="exception-label">高金额</span><span class="exception-copy"><strong>设备采购发票</strong><span>单笔 ¥68,420.00，按规则必须人工审核</span></span><span class="todo-state">去处理 →</span></a></li>
+          </ul>
+        </section>
+      </div>
+      <p class="task-footer-note">人工修改会记录修改前后值、理由和操作者。受影响的后续结果将停止使用，并从最早受影响的步骤重新处理。</p>
+    </div>
+  </section>
+
+  <section class="page-view exception-detail-shell" id="lowConfidenceView" aria-labelledby="lowConfidenceTitle" hidden>
+    <div class="exception-detail-inner">
+      <header class="exception-detail-header">
+        <div>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 低置信度</p>
+          <h1 class="exception-detail-title" id="lowConfidenceTitle">为这张差旅费报销单选择正确科目</h1>
+          <div class="exception-detail-meta">
+            <span class="mono">TASK-2026-07-024</span>
+            <span class="mono">ITEM-014</span>
+            <span>科目推荐置信度 57%</span>
+          </div>
+        </div>
+        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
+      </header>
+
+      <div class="exception-detail-grid">
+        <section class="exception-detail-card" aria-labelledby="lowEvidenceTitle">
+          <div class="exception-reason">
+            <strong>为什么需要会计选择</strong>
+            <p>资料识别和流水匹配都已完成，但报销单只写了“客户现场沟通”，无法确定应计入管理费用还是销售费用。科目推荐置信度 57%，低于 60% 的人工处理线。</p>
+          </div>
+          <h2 id="lowEvidenceTitle">原始资料和 AI 判断</h2>
+          <dl class="fact-list">
+            <div class="fact-row"><dt>原始资料</dt><dd>差旅费报销单 DOC-EXP-0716</dd><span class="fact-confidence">识别 96%</span></div>
+            <div class="fact-row"><dt>报销摘要</dt><dd>客户现场沟通 · 住宿费</dd><span class="fact-confidence">字段位置：第 3 行</span></div>
+            <div class="fact-row"><dt>匹配流水</dt><dd>招商银行 · 2026-07-17 · ¥1,680.00</dd><span class="fact-confidence">匹配 93%</span></div>
+            <div class="fact-row"><dt>AI 推荐科目</dt><dd>管理费用—差旅费</dd><span class="fact-confidence">推荐 57%</span></div>
+            <div class="fact-row"><dt>推荐依据</dt><dd>摘要包含“差旅”和“住宿”，但缺少费用归属部门</dd><span class="fact-confidence">VoucherAgent</span></div>
+          </dl>
+        </section>
+
+        <form class="exception-detail-card exception-action" id="lowConfidenceForm" aria-labelledby="lowActionTitle">
+          <h2 id="lowActionTitle">人工选择会计科目</h2>
+          <div class="subject-options">
+            <label class="subject-option"><input type="radio" name="subject" value="管理费用—差旅费"><span class="subject-copy"><strong>管理费用—差旅费</strong><span>AI 首选；适用于行政或内部管理活动</span></span><span class="subject-confidence">57%</span></label>
+            <label class="subject-option"><input type="radio" name="subject" value="销售费用—差旅费"><span class="subject-copy"><strong>销售费用—差旅费</strong><span>适用于客户拓展或销售活动</span></span><span class="subject-confidence">28%</span></label>
+            <label class="subject-option"><input type="radio" name="subject" value="管理费用—办公费"><span class="subject-copy"><strong>管理费用—办公费</strong><span>其他历史凭证中的少量候选</span></span><span class="subject-confidence">15%</span></label>
+          </div>
+          <label class="field-label" for="lowConfidenceReason">选择理由
+            <textarea id="lowConfidenceReason" placeholder="例如：本次出差由销售部门发起，用于客户拜访。"></textarea>
+          </label>
+          <div class="exception-impact">保存后，系统会根据人工选择更新凭证草稿。新草稿仍需会计审核，AI 不会写入正式账簿。</div>
+          <p class="exception-action-status" id="lowConfidenceStatus" aria-live="polite">请选择科目并填写理由。</p>
+          <button class="button button-primary" type="submit" id="lowConfidenceButton">确认科目并更新草稿</button>
+          <div class="exception-record" id="lowConfidenceRecord" hidden></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-view exception-detail-shell" id="highAmountView" aria-labelledby="highAmountTitle" hidden>
+    <div class="exception-detail-inner">
+      <header class="exception-detail-header">
+        <div>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 高金额</p>
+          <h1 class="exception-detail-title" id="highAmountTitle">审核这笔 ¥68,420.00 的设备采购</h1>
+          <div class="exception-detail-meta">
+            <span class="mono">TASK-2026-07-024</span>
+            <span class="mono">ITEM-021</span>
+            <span>账套人工审核线：¥50,000.00</span>
+          </div>
+        </div>
+        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
+      </header>
+
+      <div class="exception-detail-grid">
+        <section class="exception-detail-card" aria-labelledby="highEvidenceTitle">
+          <div class="exception-reason">
+            <strong>为什么置信度高仍需人工审核</strong>
+            <p>本账套规定，单笔金额达到 ¥50,000.00 必须逐笔人工批准。这条风险规则优先于置信度，因此系统没有把该草稿放入批量审核。</p>
+          </div>
+          <h2 id="highEvidenceTitle">原始资料和 AI 判断</h2>
+          <dl class="fact-list">
+            <div class="fact-row"><dt>采购发票</dt><dd>服务器与显示器 · DOC-EQUIP-0719 · ¥68,420.00</dd><span class="fact-confidence">识别 99%</span></div>
+            <div class="fact-row"><dt>匹配流水</dt><dd>招商银行 · 2026-07-21 · ¥68,420.00</dd><span class="fact-confidence">匹配 96%</span></div>
+            <div class="fact-row"><dt>凭证草稿</dt><dd>借：固定资产—电子设备　贷：银行存款</dd><span class="fact-confidence">推荐 93%</span></div>
+            <div class="fact-row"><dt>推荐依据</dt><dd>发票商品为服务器和显示器；金额、日期与流水一致</dd><span class="fact-confidence">VoucherAgent</span></div>
+          </dl>
+        </section>
+
+        <form class="exception-detail-card exception-action" id="highAmountForm" aria-labelledby="highActionTitle">
+          <h2 id="highActionTitle">逐笔批准前确认</h2>
+          <div class="risk-checks">
+            <label class="risk-check"><input type="checkbox" id="highMatchCheck"><span>我已核对发票和银行流水，确认属于同一笔采购。</span></label>
+            <label class="risk-check"><input type="checkbox" id="highVoucherCheck"><span>我已核对金额和会计科目，确认凭证草稿无误。</span></label>
+          </div>
+          <div class="exception-impact">批准后，这份草稿进入“已批准待导出”。正式入账仍由会计在外部记账系统完成。</div>
+          <p class="exception-action-status" id="highAmountStatus" aria-live="polite">完成两项核对后才能批准。</p>
+          <button class="button button-primary" type="submit" id="highAmountButton" disabled>批准这份高金额草稿</button>
+          <div class="exception-record" id="highAmountRecord" hidden></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-view exception-detail-shell" id="conflictReviewView" aria-labelledby="conflictReviewTitle" hidden>
+    <div class="exception-detail-inner">
+      <header class="exception-detail-header">
+        <div>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 金额冲突已处理</p>
+          <h1 class="exception-detail-title" id="conflictReviewTitle">审核重新生成的云服务年费凭证草稿</h1>
+          <div class="exception-detail-meta">
+            <span class="mono">TASK-2026-07-024</span>
+            <span class="mono">ITEM-009 · 草稿 V-0712-R1</span>
+            <span>人工确认金额：¥68,420.00</span>
+          </div>
+        </div>
+        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
+      </header>
+
+      <div class="exception-detail-grid">
+        <section class="exception-detail-card" aria-labelledby="conflictReviewEvidenceTitle">
+          <div class="exception-reason">
+            <strong>为什么还需要审核</strong>
+            <p>会计已确认采用发票金额，系统据此重新匹配流水并生成新草稿。人工确认解决了冲突，但新结果仍需审核人员批准后才能导出。</p>
+          </div>
+          <h2 id="conflictReviewEvidenceTitle">重跑结果和新草稿</h2>
+          <dl class="fact-list">
+            <div class="fact-row"><dt>人工确认</dt><dd>采用发票金额 ¥68,420.00</dd><span class="fact-confidence">会计 · 陈妍</span></div>
+            <div class="fact-row"><dt>重新匹配</dt><dd>招商银行流水 DOC-BANK-0721</dd><span class="fact-confidence">匹配 96%</span></div>
+            <div class="fact-row"><dt>新凭证草稿</dt><dd>借：管理费用—软件服务费　贷：银行存款</dd><span class="fact-confidence">推荐 94%</span></div>
+            <div class="fact-row"><dt>生成依据</dt><dd>采用人工确认金额；交易对手一致，日期相差 3 天，摘要包含“云服务年费”</dd><span class="fact-confidence">VoucherAgent</span></div>
+            <div class="fact-row"><dt>版本影响</dt><dd>旧匹配结果和旧草稿停止使用，继续保留在操作记录中</dd><span class="fact-confidence">V-0712 → V-0712-R1</span></div>
+          </dl>
+        </section>
+
+        <form class="exception-detail-card exception-action" id="conflictReviewForm" aria-labelledby="conflictReviewActionTitle">
+          <h2 id="conflictReviewActionTitle">批准新草稿前确认</h2>
+          <div class="risk-checks">
+            <label class="risk-check"><input type="checkbox" id="conflictMatchCheck"><span>我已核对人工确认金额和新的流水匹配结果。</span></label>
+            <label class="risk-check"><input type="checkbox" id="conflictVoucherCheck"><span>我已核对新草稿的金额、摘要和会计科目。</span></label>
+          </div>
+          <div class="exception-impact">批准后，这份草稿进入“已批准待导出”，任务详情中的金额冲突待办同步结束。正式入账仍由会计在外部记账系统完成。</div>
+          <p class="exception-action-status" id="conflictReviewStatus" aria-live="polite">完成两项核对后才能批准。</p>
+          <button class="button button-primary" type="submit" id="conflictReviewButton" disabled>批准这份新草稿</button>
+          <div class="exception-record" id="conflictReviewRecord" hidden></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-view review-shell" id="reviewView" aria-labelledby="reviewTitle" hidden>
+    <div class="review-inner">
+      <header class="review-header">
+        <div>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 批量审核</p>
+          <h1 class="review-title" id="reviewTitle">批量审核 18 份凭证草稿</h1>
+          <div class="review-meta">
+            <span class="mono">TASK-2026-07-024</span>
+            <span>识别、匹配和科目推荐置信度均 ≥85%</span>
+            <span>金额冲突、低置信度和高金额共 3 项，不在本次批量审核范围内</span>
+          </div>
+        </div>
+        <div class="review-actions">
+          <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
+        </div>
+      </header>
+
+      <section class="review-summary" aria-label="本次批量审核范围">
+        <div class="review-summary-card is-primary">
+          <span class="review-summary-label">本次操作范围</span>
+          <strong class="review-summary-value">18 份草稿</strong>
+          <p class="review-summary-copy">只包含无异常、高置信度草稿。审核人员批准后，才能生成导出文件。</p>
+        </div>
+        <div class="review-summary-card"><span class="review-summary-label">最低识别置信度</span><strong class="review-summary-value">92%</strong></div>
+        <div class="review-summary-card"><span class="review-summary-label">最低匹配置信度</span><strong class="review-summary-value">90%</strong></div>
+        <div class="review-summary-card"><span class="review-summary-label">最低科目置信度</span><strong class="review-summary-value">88%</strong></div>
+      </section>
+
+      <div class="review-layout">
+        <section class="review-card" aria-labelledby="draftsTitle">
+          <h2 id="draftsTitle">查看草稿和 AI 判断依据</h2>
+          <p class="review-help">第一份草稿已展开，显示原始资料、流水匹配和科目推荐；其余 17 份显示摘要和最低置信度。</p>
+          <ul class="draft-list">
+            <li class="draft-row is-expanded">
+              <input type="checkbox" checked aria-label="选择云服务年费凭证草稿">
+              <div>
+                <div class="draft-name">云服务年费 · 凭证草稿 V-0712</div>
+                <div class="draft-detail">借：管理费用—办公费　贷：银行存款</div>
+              </div>
+              <strong class="draft-amount">¥12,800.00</strong>
+              <div class="draft-evidence">
+                <div><span>原始资料</span><strong>电子发票 INV-0712</strong></div>
+                <div><span>匹配结果</span><strong>银行流水 BANK-0714 · 95%</strong></div>
+                <div><span>科目推荐</span><strong>参考本账套历史同类凭证 · 92%</strong></div>
+              </div>
+              <div class="draft-controls">
+                <button class="button" type="button" data-draft-action="modify">修改科目</button>
+                <button class="button" type="button" data-draft-action="reject">驳回草稿</button>
+              </div>
+              <div class="draft-edit-panel" id="modifyPanel" hidden>
+                <label>人工选择科目
+                  <select id="subjectSelect">
+                    <option value="管理费用—办公费">管理费用—办公费</option>
+                    <option value="管理费用—软件服务费">管理费用—软件服务费</option>
+                    <option value="销售费用—办公费">销售费用—办公费</option>
+                  </select>
+                </label>
+                <label>修改理由
+                  <textarea id="modifyReason" placeholder="例如：根据账套科目映射，该服务应归入软件服务费。"></textarea>
+                </label>
+                <div class="draft-edit-actions">
+                  <button class="button button-primary" type="button" id="saveModifyButton">保存人工修改</button>
+                  <button class="button" type="button" data-draft-action="cancel">取消</button>
+                </div>
+              </div>
+              <div class="draft-edit-panel" id="rejectPanel" hidden>
+                <label>驳回去向
+                  <select id="rejectAction">
+                    <option value="退回重做">退回重做</option>
+                    <option value="终止该项">终止该项</option>
+                  </select>
+                </label>
+                <label>驳回理由
+                  <textarea id="rejectReason" placeholder="请说明为什么不能批准这份草稿。"></textarea>
+                </label>
+                <div class="draft-edit-actions">
+                  <button class="button button-primary" type="button" id="saveRejectButton">确认驳回</button>
+                  <button class="button" type="button" data-draft-action="cancel">取消</button>
+                </div>
+              </div>
+              <div class="draft-change-record" id="draftChangeRecord" aria-live="polite" hidden></div>
+            </li>
+            <li class="draft-row">
+              <input type="checkbox" checked aria-label="选择办公用品凭证草稿">
+              <div><div class="draft-name">办公用品采购 · 凭证草稿 V-0715</div><div class="draft-detail">资料、流水与摘要一致 · 最低置信度 94%</div></div>
+              <strong class="draft-amount">¥2,360.00</strong>
+            </li>
+            <li class="draft-row">
+              <input type="checkbox" checked aria-label="选择差旅住宿凭证草稿">
+              <div><div class="draft-name">差旅住宿费 · 凭证草稿 V-0717</div><div class="draft-detail">日期相差 1 天，摘要包含“住宿” · 最低置信度 90%</div></div>
+              <strong class="draft-amount">¥1,680.00</strong>
+            </li>
+            <li class="draft-row">
+              <input type="checkbox" checked aria-label="选择其余十五份凭证草稿">
+              <div><div class="draft-name">其余 15 份无异常草稿</div><div class="draft-detail">均未出现金额冲突、重复、匹配失败或高金额情况</div></div>
+              <strong class="draft-amount">15 份</strong>
+            </li>
+          </ul>
+        </section>
+
+        <form class="review-card review-decision" id="reviewForm" aria-labelledby="reviewDecisionTitle">
+          <h2 id="reviewDecisionTitle">批准前请确认</h2>
+          <div class="decision-callout">
+            <strong>异常项不会包含在本次批准中</strong>
+            <p>金额冲突、低置信度和高金额共 3 项，仍留在人工处理列表中，不能通过批量操作跳过。</p>
+          </div>
+          <label class="review-check"><input type="checkbox" id="scopeCheck"><span>我已确认本次范围为 18 份无异常凭证草稿。</span></label>
+          <label class="review-check"><input type="checkbox" id="ledgerCheck"><span>我理解批准只生成可导出凭证，不会写入正式账簿。</span></label>
+          <p class="review-status" id="reviewStatus" aria-live="polite">批准后，18 份草稿进入可导出状态，并记录操作者、时间和草稿范围。</p>
+          <button class="button button-primary review-submit" type="submit" id="approveButton" disabled>批准 18 份草稿</button>
+          <a class="button review-submit" href="#complete/TASK-2026-07-024" id="exportButton" hidden>导出已批准凭证</a>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="page-view complete-shell" id="completeView" aria-labelledby="completeTitle" hidden>
+    <div class="complete-inner">
+      <header class="complete-header">
+        <div>
+          <p class="section-kicker">云帆科技（上海）有限公司 · 导出结果</p>
+          <h1 class="complete-title" id="completeTitle">18 份已批准凭证已导出</h1>
+          <div class="complete-meta">
+            <span class="mono">TASK-2026-07-024</span>
+            <span class="mono">EXPORT-20260726-01</span>
+            <span>导出人：会计 · 陈妍</span>
+          </div>
+        </div>
+        <div class="complete-actions">
+          <a class="button" href="#task/TASK-2026-07-024">查看剩余待处理项</a>
+          <a class="button button-primary" href="#workbench">返回客户工作台</a>
+        </div>
+      </header>
+
+      <div class="complete-result">
+        <section class="complete-card" aria-labelledby="resultSummaryTitle">
+          <div class="complete-mark" aria-hidden="true">✓</div>
+          <h2 id="resultSummaryTitle">本次批量审核与导出已完成</h2>
+          <p>这 18 份凭证已经会计批准并生成导出记录。下一步由会计在外部记账系统中导入或录入；AI 没有写入正式账簿。</p>
+          <div class="complete-stats">
+            <div class="complete-stat"><span class="complete-stat-label">已批准并导出</span><strong class="complete-stat-value">18</strong></div>
+            <div class="complete-stat is-warning"><span class="complete-stat-label">仍待人工处理</span><strong class="complete-stat-value">3</strong></div>
+          </div>
+        </section>
+
+        <section class="complete-card" aria-labelledby="exportRecordTitle">
+          <h2 id="exportRecordTitle">操作记录</h2>
+          <ol class="complete-timeline">
+            <li><time>10:31:42</time><span><strong>会计 · 陈妍</strong> 导出 18 份已批准凭证，生成记录 EXPORT-20260726-01。</span></li>
+            <li><time>10:31:18</time><span><strong>审核人员 · 陈妍</strong> 批量批准 18 份无异常凭证草稿。</span></li>
+            <li><time>10:24:06</time><span><strong>系统 · VoucherAgent</strong> 生成凭证草稿，并按每项最低置信度分配审核列表。</span></li>
+          </ol>
+        </section>
+      </div>
+      <p class="complete-note">本月任务还没有全部结束：3 项异常仍需逐项处理。已经导出的 18 份凭证不受影响。</p>
+    </div>
+  </section>
+
+  <div class="page-view app-shell" id="conflictView" hidden>
+    <header class="topbar">
+      <div class="brand-context">
+        <div class="product-context">
+          <span class="product-label">AI 记账 Agent</span>
+          <div class="product-mark">云帆科技（上海）有限公司 · 2026 年 7 月记账</div>
+        </div>
+        <div class="task-code">任务 TASK-2026-07-024</div>
+      </div>
+      <div class="task-context" aria-label="当前任务上下文">
+        <a class="button" href="#task/TASK-2026-07-024">返回任务详情</a>
+        <div class="context-fact">
+          <span class="context-label">本批资料</span>
+          <span class="context-value mono">23 项</span>
+        </div>
+        <div class="context-fact">
+          <span class="context-label">待人工确认</span>
+          <span class="context-value mono">3 项</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="process-section" aria-labelledby="processTitle">
+      <div class="process-guide">
+        <div class="process-guide-copy">
+          <h2 class="process-title" id="processTitle">本批资料处理进度</h2>
+          <p class="process-explanation">AI 会先识别资料、匹配银行流水，再生成凭证草稿；遇到冲突时交给会计确认。</p>
+        </div>
+        <span class="process-current" id="processCurrent">当前：第 4 步</span>
+      </div>
+      <div class="batch-rail" aria-label="记账资料处理步骤">
+        <div class="agent-node is-complete" data-agent="document">
+          <span class="agent-index" aria-hidden="true">1</span>
+          <div class="agent-copy">
+            <div class="agent-name">识别并整理资料</div>
+            <div class="agent-role">DocumentAgent</div>
+            <div class="agent-state">已完成 · 23 项资料</div>
+          </div>
+        </div>
+        <div class="agent-node is-complete" data-agent="matching">
+          <span class="agent-index" aria-hidden="true">2</span>
+          <div class="agent-copy">
+            <div class="agent-name">匹配银行流水</div>
+            <div class="agent-role">MatchingAgent</div>
+            <div class="agent-state">已暂停 · 发现 1 项金额冲突</div>
+          </div>
+        </div>
+        <div class="agent-node" data-agent="voucher">
+          <span class="agent-index" aria-hidden="true">3</span>
+          <div class="agent-copy">
+            <div class="agent-name">生成凭证草稿</div>
+            <div class="agent-role">VoucherAgent</div>
+            <div class="agent-state">未开始 · 等待金额确认</div>
+          </div>
+        </div>
+        <div class="agent-node is-active" data-agent="human">
+          <span class="agent-index" aria-hidden="true">4</span>
+          <div class="agent-copy">
+            <div class="agent-name">会计确认异常</div>
+            <div class="agent-role">人工处理</div>
+            <div class="agent-state">正在处理 · 请确认正确金额</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <main class="workbench">
+      <aside class="decision-queue" aria-label="需要会计处理的项目">
+        <h2 class="queue-heading">需要会计处理</h2>
+        <p class="queue-summary">共 3 项，先处理会阻断后续步骤的异常</p>
+        <ol class="queue-list">
+          <li class="queue-item is-current" aria-current="true">
+            <div class="queue-item-head">
+              <span class="risk-label">金额冲突</span>
+              <span class="mono">1 / 3</span>
+            </div>
+            <h3 class="queue-title">上海恒际云服务有限公司</h3>
+            <p class="queue-detail">发票与银行流水相差 ¥200.00</p>
+          </li>
+          <li class="queue-item">
+            <div class="queue-item-head">
+              <span class="risk-label">低置信度</span>
+              <span class="mono">2 / 3</span>
+            </div>
+            <h3 class="queue-title">差旅费报销单</h3>
+            <p class="queue-detail">科目推荐置信度 57%</p>
+          </li>
+          <li class="queue-item">
+            <div class="queue-item-head">
+              <span class="risk-label">高金额</span>
+              <span class="mono">3 / 3</span>
+            </div>
+            <h3 class="queue-title">设备采购发票</h3>
+            <p class="queue-detail">单笔金额 ¥68,420.00</p>
+          </li>
+        </ol>
+      </aside>
+
+      <section class="decision-canvas" aria-labelledby="caseTitle">
+        <header class="canvas-header">
+          <span class="case-status" id="caseStatus">资料冲突 · 必须人工处理</span>
+          <h1 id="caseTitle">这笔交易应以哪个金额继续匹配？</h1>
+          <p class="case-lede">系统不会自动选择金额。确认后，将重新匹配银行流水并生成新草稿；旧结果仍保留在操作记录中，但不再使用。</p>
+        </header>
+
+        <div class="evidence-stage">
+          <article class="evidence-card">
+            <div class="evidence-source">
+              <span class="source-type">增值税电子普通发票</span>
+              <span class="mono">DOC-INV-0718</span>
+            </div>
+            <strong class="amount">¥68,420.00</strong>
+            <p class="evidence-field">价税合计 · 发票第 14 行</p>
+            <div class="confidence-row">
+              <span>金额识别 · DocumentAgent</span>
+              <span class="confidence">98%</span>
+            </div>
+          </article>
+
+          <article class="evidence-card">
+            <div class="evidence-source">
+              <span class="source-type">招商银行交易流水</span>
+              <span class="mono">DOC-BANK-0721</span>
+            </div>
+            <strong class="amount">¥68,220.00</strong>
+            <p class="evidence-field">支出金额 · 2026-07-21 交易记录</p>
+            <div class="confidence-row">
+              <span>候选交易匹配 · MatchingAgent</span>
+              <span class="confidence">91%</span>
+            </div>
+          </article>
+
+          <section class="reasoning" aria-labelledby="reasoningTitle">
+            <h2 class="reasoning-title" id="reasoningTitle">为什么被送来人工处理</h2>
+            <p class="reasoning-copy">发票和流水的交易对手一致，日期相差 3 天，摘要都包含“云服务年费”，但金额相差 ¥200.00。即使匹配置信度为 91%，金额不一致仍必须由会计确认。</p>
+          </section>
+
+          <form class="decision-panel" id="decisionForm">
+            <h2>确认正确金额</h2>
+            <p class="decision-help">请选择你已经核对过的金额。保存后会写入操作记录，不能删除。</p>
+            <div class="decision-options">
+              <label class="decision-option">
+                <input type="radio" name="amount" value="68420" data-label="发票金额 ¥68,420.00">
+                <span class="option-source">采用发票金额</span>
+                <span class="option-amount">¥68,420.00</span>
+              </label>
+              <label class="decision-option">
+                <input type="radio" name="amount" value="68220" data-label="流水金额 ¥68,220.00">
+                <span class="option-source">采用流水金额</span>
+                <span class="option-amount">¥68,220.00</span>
+              </label>
+            </div>
+            <div class="decision-meta">
+              <span>确认后会重新生成：匹配结果、凭证草稿</span>
+              <span class="mono">ITEM-009</span>
+            </div>
+          </form>
+        </div>
+
+        <section class="audit-trail" aria-labelledby="auditTitle">
+          <h2 class="audit-heading" id="auditTitle">这项交易的处理记录</h2>
+          <ol class="audit-list" id="auditList">
+            <li class="audit-row">
+              <time class="audit-time">10:23:18</time>
+              <span class="audit-mark" aria-hidden="true"></span>
+              <span class="audit-copy"><strong>MatchingAgent</strong> 识别到金额冲突，暂停生成凭证草稿并交给会计处理。</span>
+            </li>
+            <li class="audit-row">
+              <time class="audit-time">10:22:54</time>
+              <span class="audit-mark" aria-hidden="true"></span>
+              <span class="audit-copy"><strong>DocumentAgent</strong> 从两份资料提取金额、日期、交易对手与摘要。</span>
+            </li>
+          </ol>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <footer class="decision-bar" id="conflictDecisionBar" aria-label="决策操作栏" hidden>
+    <div class="decision-bar-inner">
+      <div class="status-line" aria-live="polite">
+        <span class="status-indicator" id="statusIndicator" aria-hidden="true"></span>
+        <div class="status-copy">
+          <div class="status-title" id="statusTitle">请选择正确金额</div>
+          <div class="status-detail" id="statusDetail">确认后重新匹配银行流水，并重新生成凭证草稿</div>
+        </div>
+      </div>
+      <div class="action-group">
+        <button class="button" type="button" id="resetButton" hidden>恢复演示</button>
+        <a class="button button-primary" href="#conflict-review/ITEM-009" id="reviewConflictButton" hidden>审核新草稿</a>
+        <button class="button button-primary" type="submit" form="decisionForm" id="confirmButton" disabled>
+          <span class="spinner" aria-hidden="true"></span><span id="confirmLabel">确认并重新匹配</span>
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const form = document.querySelector("#decisionForm");
+    const confirmButton = document.querySelector("#confirmButton");
+    const confirmLabel = document.querySelector("#confirmLabel");
+    const resetButton = document.querySelector("#resetButton");
+    const reviewConflictButton = document.querySelector("#reviewConflictButton");
+    const statusTitle = document.querySelector("#statusTitle");
+    const statusDetail = document.querySelector("#statusDetail");
+    const statusIndicator = document.querySelector("#statusIndicator");
+    const caseStatus = document.querySelector("#caseStatus");
+    const processCurrent = document.querySelector("#processCurrent");
+    const auditList = document.querySelector("#auditList");
+    const matchingNode = document.querySelector('[data-agent="matching"]');
+    const voucherNode = document.querySelector('[data-agent="voucher"]');
+    const humanNode = document.querySelector('[data-agent="human"]');
+    const initialAudit = auditList.innerHTML;
+    const taskTitleElement = document.querySelector("#taskTitle");
+    const taskUpdated = document.querySelector("#taskUpdated");
+    const taskMatchingNote = document.querySelector("#taskMatchingNote");
+    const taskMatchingStatus = document.querySelector("#taskMatchingStatus");
+    const taskVoucherNote = document.querySelector("#taskVoucherNote");
+    const taskVoucherStatus = document.querySelector("#taskVoucherStatus");
+    const taskProgressCopy = document.querySelector("#taskProgressCopy");
+    const taskProgressValue = document.querySelector("#taskProgressValue");
+    const taskProgressTrack = document.querySelector("#taskProgressTrack");
+    const taskProgressFill = document.querySelector("#taskProgressFill");
+    const taskConfirmCount = document.querySelector("#taskConfirmCount");
+    const taskManualCount = document.querySelector("#taskManualCount");
+    const workbenchConfirmCount = document.querySelector("#workbenchConfirmCount");
+    const workbenchManualCount = document.querySelector("#workbenchManualCount");
+    const taskConflictLink = document.querySelector("#taskConflictLink");
+    const taskConflictLabel = document.querySelector("#taskConflictLabel");
+    const taskConflictCopy = document.querySelector("#taskConflictCopy");
+    const taskConflictState = document.querySelector("#taskConflictState");
+    let conflictWorkflowStage = "initial";
+
+    function syncConflictTaskState(stage) {
+      conflictWorkflowStage = stage;
+      taskConflictLink.classList.toggle("is-resolved", stage !== "initial");
+
+      if (stage === "resolved") {
+        taskTitleElement.textContent = "18 份草稿待批量审核，1 份新草稿待确认，2 项异常待处理";
+        taskUpdated.textContent = "最后更新：金额冲突已确认";
+        taskMatchingNote.textContent = "MatchingAgent · 金额冲突已解除，新匹配置信度 96%";
+        taskMatchingStatus.textContent = "已重新匹配";
+        taskVoucherNote.textContent = "VoucherAgent · 已生成 19 份草稿，其中 1 份等待逐笔审核";
+        taskVoucherStatus.textContent = "已生成 19 份";
+        taskProgressCopy.textContent = "金额冲突项已重新匹配并生成新草稿，当前有 19 个处理项形成草稿";
+        taskProgressValue.textContent = "19 / 21 项";
+        taskProgressTrack.setAttribute("aria-label", "任务处理进度 90%");
+        taskProgressFill.style.width = "90%";
+        taskConfirmCount.textContent = "1";
+        taskManualCount.textContent = "2";
+        workbenchConfirmCount.textContent = "1";
+        workbenchManualCount.textContent = "2";
+        taskConflictLink.setAttribute("href", "#conflict-review/ITEM-009");
+        taskConflictLabel.textContent = "待审核";
+        taskConflictCopy.textContent = "金额已确认并生成新草稿，需审核人员逐笔批准";
+        taskConflictState.textContent = "去审核 →";
+        return;
+      }
+
+      if (stage === "approved") {
+        taskTitleElement.textContent = "18 份草稿待批量审核，2 项异常待处理，1 份已批准待导出";
+        taskUpdated.textContent = "最后更新：冲突草稿已批准";
+        taskMatchingNote.textContent = "MatchingAgent · 金额冲突已解除，新匹配置信度 96%";
+        taskMatchingStatus.textContent = "已重新匹配";
+        taskVoucherNote.textContent = "VoucherAgent · 已生成 19 份草稿，冲突草稿已人工批准";
+        taskVoucherStatus.textContent = "1 份已批准";
+        taskProgressCopy.textContent = "金额冲突项已完成人工确认和草稿审核，仍有 2 项异常等待处理";
+        taskProgressValue.textContent = "19 / 21 项";
+        taskProgressTrack.setAttribute("aria-label", "任务处理进度 90%");
+        taskProgressFill.style.width = "90%";
+        taskConfirmCount.textContent = "0";
+        taskManualCount.textContent = "2";
+        workbenchConfirmCount.textContent = "0";
+        workbenchManualCount.textContent = "2";
+        taskConflictLink.setAttribute("href", "#conflict-review/ITEM-009");
+        taskConflictLabel.textContent = "已批准待导出";
+        taskConflictCopy.textContent = "人工确认金额后已重新匹配，新草稿已由审核人员批准";
+        taskConflictState.textContent = "查看结果 →";
+        return;
+      }
+
+      taskTitleElement.textContent = "18 份草稿待批量审核，3 项异常待处理";
+      taskUpdated.textContent = "最后更新 10:23";
+      taskMatchingNote.textContent = "MatchingAgent · 正常项已完成，发现 1 项金额冲突";
+      taskMatchingStatus.textContent = "正常项已完成";
+      taskVoucherNote.textContent = "VoucherAgent · 已生成 18 份草稿，异常项等待处理";
+      taskVoucherStatus.textContent = "已生成 18 份";
+      taskProgressCopy.textContent = "AI 已识别 23 份资料并形成 21 个处理项，其中 18 项可以进入批量审核";
+      taskProgressValue.textContent = "18 / 21 项";
+      taskProgressTrack.setAttribute("aria-label", "任务处理进度 86%");
+      taskProgressFill.style.width = "86%";
+      taskConfirmCount.textContent = "0";
+      taskManualCount.textContent = "3";
+      workbenchConfirmCount.textContent = "0";
+      workbenchManualCount.textContent = "3";
+      taskConflictLink.setAttribute("href", "#conflict/ITEM-009");
+      taskConflictLabel.textContent = "金额冲突";
+      taskConflictCopy.textContent = "发票与流水相差 ¥200.00，需确认正确金额";
+      taskConflictState.textContent = "去处理 →";
+    }
+
+    function setAgentState(node, state, copy) {
+      node.classList.remove("is-active", "is-complete");
+      if (state) node.classList.add(state);
+      node.querySelector(".agent-state").textContent = copy;
+    }
+
+    function appendAudit(actor, copy) {
+      const now = new Intl.DateTimeFormat("zh-CN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).format(new Date());
+      const row = document.createElement("li");
+      row.className = "audit-row is-new";
+      row.innerHTML = `<time class="audit-time">${now}</time><span class="audit-mark" aria-hidden="true"></span><span class="audit-copy"><strong>${actor}</strong> ${copy}</span>`;
+      auditList.prepend(row);
+    }
+
+    form.addEventListener("change", () => {
+      const selected = form.querySelector('input[name="amount"]:checked');
+      confirmButton.disabled = !selected;
+      statusTitle.textContent = selected ? `将采用${selected.dataset.label}` : "请选择正确金额";
+    });
+
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const selected = form.querySelector('input[name="amount"]:checked');
+      if (!selected || confirmButton.disabled) return;
+
+      form.querySelectorAll("input").forEach((input) => { input.disabled = true; });
+      confirmButton.disabled = true;
+      confirmButton.classList.add("is-loading");
+      confirmLabel.textContent = "正在重新匹配";
+      statusTitle.textContent = "正在重新匹配银行流水";
+      statusDetail.textContent = "已保存人工确认；旧匹配结果和凭证草稿保留在记录中，不再使用";
+      caseStatus.textContent = "处理中 · 正在重新匹配银行流水";
+      processCurrent.textContent = "当前：重新匹配";
+      setAgentState(humanNode, "is-complete", "已确认正确金额");
+      setAgentState(matchingNode, "is-active", "正在重新匹配");
+      appendAudit("会计 · 陈妍", `确认${selected.dataset.label}；原匹配结果和原凭证草稿停止使用，并保留在记录中。`);
+
+      window.setTimeout(() => {
+        setAgentState(matchingNode, "is-complete", "新匹配结果 · 96%");
+        setAgentState(voucherNode, "is-active", "正在生成新草稿");
+        statusTitle.textContent = "正在重新生成凭证草稿";
+        statusDetail.textContent = "新匹配已关联招商银行流水，并保留人工确认作为依据";
+        processCurrent.textContent = "当前：重新生成草稿";
+        appendAudit("MatchingAgent", "完成重新匹配，生成新的匹配结果；匹配置信度 96%。");
+      }, 1100);
+
+      window.setTimeout(() => {
+        setAgentState(voucherNode, "is-complete", "新草稿 · 等待审核");
+        confirmButton.classList.remove("is-loading");
+        confirmLabel.textContent = "新草稿已生成";
+        caseStatus.textContent = "已完成 · 新草稿等待审核人员批准";
+        processCurrent.textContent = "下一步：审核草稿";
+        statusTitle.textContent = "新草稿已生成，等待审核人员批准";
+        statusDetail.textContent = "草稿仍需人工批准；AI 不会写入正式账簿";
+        statusIndicator.style.background = "var(--color-accent)";
+        resetButton.hidden = false;
+        confirmButton.hidden = true;
+        reviewConflictButton.hidden = false;
+        syncConflictTaskState("resolved");
+        appendAudit("VoucherAgent", "根据新的匹配结果生成凭证草稿，等待审核人员批准。" );
+      }, 2200);
+    });
+
+    resetButton.addEventListener("click", () => {
+      form.reset();
+      form.querySelectorAll("input").forEach((input) => { input.disabled = false; });
+      auditList.innerHTML = initialAudit;
+      confirmButton.disabled = true;
+      confirmButton.hidden = false;
+      confirmButton.classList.remove("is-loading");
+      confirmLabel.textContent = "确认并重新匹配";
+      resetButton.hidden = true;
+      reviewConflictButton.hidden = true;
+      statusTitle.textContent = "请选择正确金额";
+      statusDetail.textContent = "确认后重新匹配银行流水，并重新生成凭证草稿";
+      statusIndicator.style.background = "var(--color-warning)";
+      caseStatus.textContent = "资料冲突 · 必须人工处理";
+      processCurrent.textContent = "当前：第 4 步";
+      setAgentState(matchingNode, "is-complete", "发现 1 项金额冲突");
+      setAgentState(voucherNode, "", "等待冲突解除");
+      setAgentState(humanNode, "is-active", "当前步骤");
+      syncConflictTaskState("initial");
+    });
+
+    const conflictReviewForm = document.querySelector("#conflictReviewForm");
+    const conflictMatchCheck = document.querySelector("#conflictMatchCheck");
+    const conflictVoucherCheck = document.querySelector("#conflictVoucherCheck");
+    const conflictReviewButton = document.querySelector("#conflictReviewButton");
+    const conflictReviewStatus = document.querySelector("#conflictReviewStatus");
+    const conflictReviewRecord = document.querySelector("#conflictReviewRecord");
+
+    function syncConflictReviewApproval() {
+      const ready = conflictMatchCheck.checked && conflictVoucherCheck.checked;
+      conflictReviewButton.disabled = !ready;
+      conflictReviewStatus.textContent = ready ? "核对完成，可以批准这份新草稿。" : "完成两项核对后才能批准。";
+    }
+
+    conflictMatchCheck.addEventListener("change", syncConflictReviewApproval);
+    conflictVoucherCheck.addEventListener("change", syncConflictReviewApproval);
+
+    conflictReviewForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (conflictReviewButton.disabled) return;
+      conflictReviewForm.querySelectorAll("input").forEach((input) => { input.disabled = true; });
+      conflictReviewButton.disabled = true;
+      conflictReviewButton.textContent = "已批准，等待导出";
+      conflictReviewStatus.classList.add("is-success");
+      conflictReviewStatus.textContent = "新草稿已由审核人员批准，金额冲突待办已结束。";
+      conflictReviewRecord.hidden = false;
+      conflictReviewRecord.textContent = "操作记录 · 审核人员 · 陈妍 · 已核对人工确认金额、新匹配结果和新凭证草稿 · 结果：已批准待导出 · 旧版本继续保留在审计记录中。";
+      syncConflictTaskState("approved");
+    });
+
+    const lowConfidenceForm = document.querySelector("#lowConfidenceForm");
+    const lowConfidenceReason = document.querySelector("#lowConfidenceReason");
+    const lowConfidenceButton = document.querySelector("#lowConfidenceButton");
+    const lowConfidenceStatus = document.querySelector("#lowConfidenceStatus");
+    const lowConfidenceRecord = document.querySelector("#lowConfidenceRecord");
+
+    lowConfidenceForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      const selectedSubject = lowConfidenceForm.querySelector('input[name="subject"]:checked');
+      const reason = lowConfidenceReason.value.trim();
+      if (!selectedSubject || !reason) {
+        lowConfidenceStatus.textContent = !selectedSubject ? "请先选择会计科目。" : "请填写选择理由。";
+        if (!selectedSubject) lowConfidenceForm.querySelector('input[name="subject"]').focus();
+        else lowConfidenceReason.focus();
+        return;
+      }
+
+      lowConfidenceForm.querySelectorAll("input, textarea").forEach((input) => { input.disabled = true; });
+      lowConfidenceButton.disabled = true;
+      lowConfidenceButton.textContent = "草稿已更新";
+      lowConfidenceStatus.classList.add("is-success");
+      lowConfidenceStatus.textContent = "已按人工选择更新凭证草稿，下一步由会计审核新草稿。";
+      lowConfidenceRecord.hidden = false;
+      lowConfidenceRecord.textContent = `操作记录 · 会计 · 陈妍 · 原建议：管理费用—差旅费（57%） · 人工选择：${selectedSubject.value} · 理由：${reason} · 影响：旧草稿停止使用，生成新草稿。`;
+    });
+
+    const highAmountForm = document.querySelector("#highAmountForm");
+    const highMatchCheck = document.querySelector("#highMatchCheck");
+    const highVoucherCheck = document.querySelector("#highVoucherCheck");
+    const highAmountButton = document.querySelector("#highAmountButton");
+    const highAmountStatus = document.querySelector("#highAmountStatus");
+    const highAmountRecord = document.querySelector("#highAmountRecord");
+
+    function syncHighAmountApproval() {
+      const ready = highMatchCheck.checked && highVoucherCheck.checked;
+      highAmountButton.disabled = !ready;
+      highAmountStatus.textContent = ready ? "核对完成，可以批准这份草稿。" : "完成两项核对后才能批准。";
+    }
+
+    highMatchCheck.addEventListener("change", syncHighAmountApproval);
+    highVoucherCheck.addEventListener("change", syncHighAmountApproval);
+
+    highAmountForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (highAmountButton.disabled) return;
+      highAmountForm.querySelectorAll("input").forEach((input) => { input.disabled = true; });
+      highAmountButton.disabled = true;
+      highAmountButton.textContent = "已批准，等待导出";
+      highAmountStatus.classList.add("is-success");
+      highAmountStatus.textContent = "这份草稿已由审核人员逐笔批准，可以和其他已批准凭证一起导出。";
+      highAmountRecord.hidden = false;
+      highAmountRecord.textContent = "操作记录 · 审核人员 · 陈妍 · 已核对发票、流水、金额和会计科目 · 结果：已批准待导出 · AI 未写入正式账簿。";
+    });
+
+    const reviewForm = document.querySelector("#reviewForm");
+    const approveButton = document.querySelector("#approveButton");
+    const exportButton = document.querySelector("#exportButton");
+    const reviewStatus = document.querySelector("#reviewStatus");
+    const scopeCheck = document.querySelector("#scopeCheck");
+    const ledgerCheck = document.querySelector("#ledgerCheck");
+    const draftRow = document.querySelector(".draft-row.is-expanded");
+    const draftCheckbox = draftRow.querySelector("input[type='checkbox']");
+    const draftDetail = draftRow.querySelector(".draft-detail");
+    const modifyPanel = document.querySelector("#modifyPanel");
+    const rejectPanel = document.querySelector("#rejectPanel");
+    const modifyReason = document.querySelector("#modifyReason");
+    const rejectReason = document.querySelector("#rejectReason");
+    const subjectSelect = document.querySelector("#subjectSelect");
+    const rejectAction = document.querySelector("#rejectAction");
+    const draftChangeRecord = document.querySelector("#draftChangeRecord");
+    const originalSubject = "管理费用—办公费";
+    let reviewHasException = false;
+
+    function syncReviewApproval() {
+      const ready = scopeCheck.checked && ledgerCheck.checked && !reviewHasException;
+      approveButton.disabled = !ready;
+      if (!ready) {
+        reviewStatus.classList.remove("is-success");
+        reviewStatus.textContent = reviewHasException
+          ? "当前草稿已被人工修改或驳回，不能继续批量批准；请按新的状态重新处理。"
+          : "请确认批准范围和正式账簿边界后再继续。";
+      } else if (!approveButton.hidden) {
+        reviewStatus.textContent = "批准后，18 份草稿进入可导出状态，并记录操作者、时间和草稿范围。";
+      }
+    }
+
+    scopeCheck.addEventListener("change", syncReviewApproval);
+    ledgerCheck.addEventListener("change", syncReviewApproval);
+
+    document.querySelector("#reviewView").addEventListener("click", (event) => {
+      const actionButton = event.target.closest("[data-draft-action]");
+      if (!actionButton) return;
+      const action = actionButton.dataset.draftAction;
+      if (action === "modify") {
+        modifyPanel.hidden = false;
+        rejectPanel.hidden = true;
+        modifyReason.focus();
+      } else if (action === "reject") {
+        rejectPanel.hidden = false;
+        modifyPanel.hidden = true;
+        rejectReason.focus();
+      } else if (action === "cancel") {
+        modifyPanel.hidden = true;
+        rejectPanel.hidden = true;
+      }
+    });
+
+    document.querySelector("#saveModifyButton").addEventListener("click", () => {
+      const reason = modifyReason.value.trim();
+      if (!reason) {
+        modifyReason.focus();
+        reviewStatus.textContent = "保存人工修改前，请填写修改理由。";
+        return;
+      }
+      draftRow.classList.remove("is-rejected");
+      draftRow.classList.add("is-modified");
+      draftDetail.textContent = `人工修改：${subjectSelect.value} · ${reason}`;
+      draftCheckbox.checked = false;
+      draftCheckbox.disabled = true;
+      draftChangeRecord.hidden = false;
+      draftChangeRecord.textContent = `修改记录 · 会计 · 陈妍 · 前值：${originalSubject} · 后值：${subjectSelect.value} · 理由：${reason} · 影响：本草稿移出批量批准范围，需重新审核。`;
+      modifyPanel.hidden = true;
+      reviewHasException = true;
+      syncReviewApproval();
+    });
+
+    document.querySelector("#saveRejectButton").addEventListener("click", () => {
+      const reason = rejectReason.value.trim();
+      if (!reason) {
+        rejectReason.focus();
+        reviewStatus.textContent = "确认驳回前，请填写驳回理由。";
+        return;
+      }
+      draftRow.classList.remove("is-modified");
+      draftRow.classList.add("is-rejected");
+      draftDetail.textContent = `已驳回 · ${rejectAction.value} · ${reason}`;
+      draftCheckbox.checked = false;
+      draftCheckbox.disabled = true;
+      draftChangeRecord.hidden = false;
+      draftChangeRecord.textContent = `驳回记录 · 会计 · 陈妍 · 去向：${rejectAction.value} · 理由：${reason} · 影响：本草稿不进入导出范围。`;
+      rejectPanel.hidden = true;
+      reviewHasException = true;
+      syncReviewApproval();
+    });
+
+    reviewForm.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!scopeCheck.checked || !ledgerCheck.checked || reviewHasException || approveButton.disabled) return;
+
+      approveButton.disabled = true;
+      approveButton.textContent = "正在记录批准结果";
+      reviewStatus.classList.remove("is-success");
+      reviewStatus.textContent = "正在记录批量批准结果；3 项异常仍留在人工处理列表中。";
+
+      window.setTimeout(() => {
+        approveButton.hidden = true;
+        exportButton.hidden = false;
+        reviewStatus.classList.add("is-success");
+        reviewStatus.textContent = "已批准 18 份草稿。下一步：导出已批准凭证并查看结果。";
+      }, 700);
+    });
+
+    const routeViews = {
+      workbench: document.querySelector("#workbenchView"),
+      create: document.querySelector("#createView"),
+      task: document.querySelector("#taskView"),
+      lowConfidence: document.querySelector("#lowConfidenceView"),
+      highAmount: document.querySelector("#highAmountView"),
+      conflictReview: document.querySelector("#conflictReviewView"),
+      review: document.querySelector("#reviewView"),
+      complete: document.querySelector("#completeView"),
+      conflict: document.querySelector("#conflictView")
+    };
+    const decisionBar = document.querySelector("#conflictDecisionBar");
+
+    function renderRoute() {
+      const hash = window.location.hash.replace(/^#/, "");
+      const [route, id] = hash.split("/");
+      const activeRoute = route === "new-task"
+        ? "create"
+        : route === "task" && id === "TASK-2026-07-024"
+        ? "task"
+        : route === "low-confidence" && id === "ITEM-014"
+          ? "lowConfidence"
+        : route === "high-amount" && id === "ITEM-021"
+            ? "highAmount"
+        : route === "conflict-review" && id === "ITEM-009"
+          ? "conflictReview"
+        : route === "review" && id === "TASK-2026-07-024"
+          ? "review"
+          : route === "complete" && id === "TASK-2026-07-024"
+            ? "complete"
+        : route === "conflict" && id === "ITEM-009"
+          ? "conflict"
+          : "workbench";
+
+      Object.entries(routeViews).forEach(([name, view]) => {
+        const isActive = name === activeRoute;
+        view.hidden = !isActive;
+        view.setAttribute("aria-hidden", String(!isActive));
+      });
+      decisionBar.hidden = activeRoute !== "conflict";
+      if (activeRoute === "conflictReview" && conflictWorkflowStage === "initial") {
+        syncConflictTaskState("resolved");
+      }
+      document.title = activeRoute === "workbench"
+        ? "客户工作台 · AI 记账 Agent"
+        : activeRoute === "create"
+          ? "新建记账任务 · AI 记账 Agent"
+        : activeRoute === "task"
+          ? "任务详情 · 云帆科技 · AI 记账 Agent"
+          : activeRoute === "lowConfidence"
+            ? "低置信度科目确认 · 云帆科技 · AI 记账 Agent"
+            : activeRoute === "highAmount"
+              ? "高金额逐笔审核 · 云帆科技 · AI 记账 Agent"
+            : activeRoute === "conflictReview"
+              ? "金额冲突新草稿审核 · 云帆科技 · AI 记账 Agent"
+          : activeRoute === "review"
+            ? "批量审核 · 云帆科技 · AI 记账 Agent"
+            : activeRoute === "complete"
+              ? "导出结果 · 云帆科技 · AI 记账 Agent"
+              : "金额冲突决策画布 · AI 记账 Agent";
+    }
+
+    window.addEventListener("hashchange", renderRoute);
+    renderRoute();
+  </script>
+</body>
+</html>
