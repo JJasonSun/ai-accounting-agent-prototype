@@ -23,7 +23,7 @@
 - 本地启动：在项目根运行 `python3 -m http.server 4174 --bind 127.0.0.1`。
 - 预览地址：`http://127.0.0.1:4174/prototype/index.html`。
 - `CLAUDE.md` 必须继续软链接到 `AGENTS.md`，两者不得分叉维护。
-- 截至 2026-07-27：PRD 与方案说明正文已完成；原型已部署至 `https://jjasonsun.github.io/ai-accounting-agent-prototype/`，并在公开环境验收正常审核/导出、金额冲突确认、重新匹配、新草稿审核和任务状态联动。
+- 截至 2026-07-27：PRD 与方案说明正文已完成；原型已部署至 `https://jjasonsun.github.io/ai-accounting-agent-prototype/`，并在公开环境验收正常审核/导出、金额冲突重跑、低置信度新草稿审核、高金额逐笔审核、单项移出批量范围和任务状态联动。
 - 下一步：按“姓名_AI 记账 Agent 产品作业”整理最终提交文件。
 
 ## 3. 产品行为红线
