@@ -1086,7 +1086,7 @@
     .processing-track { height: 0.45rem; margin-block-start: var(--space-xs); background: var(--color-rule-soft); }
     .processing-fill { width: 8%; height: 100%; background: var(--color-accent); transition: width var(--dur-long) var(--ease-out); }
     .run-list { display: grid; gap: var(--space-2xs); margin: var(--space-lg) 0 0; padding: 0; list-style: none; }
-    .run-step { display: grid; grid-template-columns: 2rem minmax(0, 1fr) auto; align-items: start; gap: var(--space-sm); padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
+    .run-step { display: grid; grid-template-columns: 2rem minmax(0, 1fr) minmax(18rem, 24rem); align-items: start; gap: var(--space-sm); padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
     .run-index { display: grid; place-items: center; width: 1.75rem; height: 1.75rem; border: 1px solid var(--color-muted); border-radius: 50%; font-family: var(--font-mono); font-size: var(--text-xs); }
     .run-step.is-active { border-color: var(--color-warning); }
     .run-step.is-active .run-index { border: 2px solid var(--color-warning); background: var(--color-warning-soft); color: var(--color-danger); }
@@ -1097,6 +1097,7 @@
     .run-step.is-done .run-output,
     .run-step.is-partial .run-output { display: block; }
     .run-output-bar { display: grid; grid-template-columns: 20fr 1fr; height: 0.45rem; overflow: hidden; background: var(--color-rule-soft); }
+    .run-output-bar.is-complete { grid-template-columns: 1fr; }
     .run-output-bar.is-voucher { grid-template-columns: 19fr 2fr; }
     .run-output-pass { background: var(--color-accent); }
     .run-output-risk { background: var(--color-danger); }
@@ -1108,10 +1109,11 @@
     .run-step.is-done .run-state { color: var(--color-accent-hover); font-weight: 700; }
     .run-step.is-partial .run-state { color: var(--color-danger); font-weight: 700; }
     .run-state-risk { color: var(--color-danger); }
-    .processing-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); margin-block-start: var(--space-md); padding: var(--space-md); border: 1px solid var(--color-danger); background: var(--color-danger-soft); }
+    .processing-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); margin-block-start: var(--space-md); padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
     .processing-result[hidden] { display: none; }
     .processing-result strong { display: block; font-size: var(--text-sm); }
     .processing-result p { margin: var(--space-3xs) 0 0; color: var(--color-ink-soft); font-size: var(--text-xs); }
+    .processing-result .is-risk { color: var(--color-danger); }
 
     .excluded-followup { margin-block-start: var(--space-md); }
     .excluded-followup[hidden] { display: none; }
@@ -1361,7 +1363,14 @@
       <ol class="run-list" aria-label="Agent 执行步骤">
         <li class="run-step is-active" data-run-step="document">
           <span class="run-index">1</span>
-          <div><div class="run-name">识别并整理资料 · DocumentAgent</div><div class="run-detail">输入：12 份发票、8 笔银行流水、3 张费用单据 · 工具：OCR 与字段提取 · 输出：结构化字段、来源位置和独立置信度</div></div>
+          <div>
+            <div class="run-name">识别并整理资料 · DocumentAgent</div>
+            <div class="run-detail">输入：12 份发票、8 笔银行流水、3 张费用单据 · 工具：OCR 与字段提取 · 输出：结构化字段、来源位置和独立置信度</div>
+            <div class="run-output" aria-label="23 份资料已全部完成识别和整理">
+              <div class="run-output-bar is-complete" aria-hidden="true"><span class="run-output-pass"></span></div>
+              <div class="run-output-legend"><span><strong>23 / 23 份</strong> 资料识别完成</span></div>
+            </div>
+          </div>
           <span class="run-state">正在执行</span>
         </li>
         <li class="run-step" data-run-step="matching">
@@ -1391,7 +1400,7 @@
       </ol>
 
       <div class="processing-result" id="processingResult" hidden>
-        <div><strong>自动处理完成，已形成 4 组人工工作</strong><p>18 份无异常草稿可批量审核；金额冲突、低置信度和高金额各 1 项进入逐项处理。</p></div>
+        <div><strong>自动处理完成，已形成 4 组人工工作</strong><p>18 份无异常草稿可批量审核；<span class="is-risk">金额冲突、低置信度和高金额各 1 项</span>进入逐项处理。</p></div>
         <a class="button button-primary" href="#task/TASK-2026-07-024">查看任务处理结果</a>
       </div>
     </div>
