@@ -817,6 +817,8 @@
     .task-card { min-width: 0; padding: var(--space-md); border: 1px solid var(--color-rule); background: var(--color-paper-raised); }
     .task-card-wide { grid-column: 1 / -1; }
     .task-card h2 { margin: 0 0 var(--space-sm); font-family: var(--font-display); font-size: var(--text-lg); }
+    .task-card-heading { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); flex-wrap: wrap; margin-block-end: var(--space-sm); }
+    .task-card-heading h2 { margin: 0; }
     .task-card p { margin: 0; color: var(--color-ink-soft); font-size: var(--text-sm); }
     .task-progress { display: grid; gap: var(--space-xs); }
     .progress-line { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); font-size: var(--text-sm); }
@@ -1382,16 +1384,19 @@
 
       <div class="task-grid">
         <section class="task-card task-card-wide" aria-labelledby="stepsTitle">
-          <h2 id="stepsTitle">任务全局进度</h2>
+          <div class="task-card-heading">
+            <h2 id="stepsTitle">任务全局进度</h2>
+            <a class="button button-primary" href="#processing/TASK-2026-07-024" id="taskStartButton">开始 Agent 执行</a>
+          </div>
           <div class="task-steps">
-            <div class="task-step is-done"><span class="step-number">1</span><div><div class="task-step-title">识别并整理资料</div><div class="task-step-note">DocumentAgent · 整批已完成 · 23 份资料</div></div><span class="step-status">已完成</span></div>
-            <div class="task-step is-done"><span class="step-number">2</span><div><div class="task-step-title">匹配银行流水</div><div class="task-step-note" id="taskMatchingNote">MatchingAgent · 整批已完成 · 1 项金额冲突已分流</div></div><span class="step-status" id="taskMatchingStatus">已完成</span></div>
+            <div class="task-step is-done" id="taskDocumentStep"><span class="step-number">1</span><div><div class="task-step-title">识别并整理资料</div><div class="task-step-note" id="taskDocumentNote">DocumentAgent · 整批已完成 · 23 份资料</div></div><span class="step-status" id="taskDocumentStatus">已完成</span></div>
+            <div class="task-step is-done" id="taskMatchingStep"><span class="step-number">2</span><div><div class="task-step-title">匹配银行流水</div><div class="task-step-note" id="taskMatchingNote">MatchingAgent · 整批已完成 · 1 项金额冲突已分流</div></div><span class="step-status" id="taskMatchingStatus">已完成</span></div>
             <div class="task-step is-partial" id="taskVoucherStep"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 已生成 19 / 21 份 · 2 项待确认后生成</div></div><span class="step-status" id="taskVoucherStatus">部分完成</span></div>
             <div class="task-step is-active" id="taskReviewStep"><span class="step-number">4</span><div><div class="task-step-title">人工审核并导出</div><div class="task-step-note" id="taskReviewNote">审核人员 / 会计 · 进行中 · 18 份批量审核，3 项逐项处理</div></div><span class="step-status" id="taskReviewStatus">人工审核进行中</span></div>
           </div>
         </section>
 
-        <section class="task-card" aria-labelledby="progressCardTitle">
+        <section class="task-card" id="taskProgressCard" aria-labelledby="progressCardTitle">
           <h2 id="progressCardTitle">处理结果概览</h2>
           <div class="task-progress">
             <div class="progress-line"><span id="taskProgressCopy">21 个处理项已完成分流：18 项进入批量审核，3 项进入逐项处理</span><strong class="mono" id="taskProgressValue">21 / 21 项</strong></div>
@@ -1404,7 +1409,7 @@
           </div>
         </section>
 
-        <section class="task-card" aria-labelledby="todoTitle">
+        <section class="task-card" id="taskTodoCard" aria-labelledby="todoTitle">
           <h2 id="todoTitle">待办事项</h2>
           <ul class="exception-list">
             <li><a class="exception-link is-primary" href="#review/TASK-2026-07-024" id="taskBatchLink"><span class="exception-label is-batch" id="taskBatchTodoLabel">批量审核</span><span class="exception-copy"><strong id="taskBatchTodoTitle">18 份凭证草稿</strong><span id="taskBatchTodoCopy">均无异常，识别、匹配和科目推荐置信度均不低于 85%</span></span><span class="todo-state" id="taskBatchTodoState">去审核 →</span></a></li>
@@ -2002,6 +2007,11 @@
     const taskTitleElement = document.querySelector("#taskTitle");
     const taskTodoTitle = document.querySelector("#todoTitle");
     const taskUpdated = document.querySelector("#taskUpdated");
+    const taskStartButton = document.querySelector("#taskStartButton");
+    const taskDocumentStep = document.querySelector("#taskDocumentStep");
+    const taskDocumentNote = document.querySelector("#taskDocumentNote");
+    const taskDocumentStatus = document.querySelector("#taskDocumentStatus");
+    const taskMatchingStep = document.querySelector("#taskMatchingStep");
     const taskMatchingNote = document.querySelector("#taskMatchingNote");
     const taskMatchingStatus = document.querySelector("#taskMatchingStatus");
     const taskVoucherStep = document.querySelector("#taskVoucherStep");
@@ -2009,6 +2019,8 @@
     const taskVoucherStatus = document.querySelector("#taskVoucherStatus");
     const taskReviewStep = document.querySelector("#taskReviewStep");
     const taskReviewNote = document.querySelector("#taskReviewNote");
+    const taskProgressCard = document.querySelector("#taskProgressCard");
+    const taskTodoCard = document.querySelector("#taskTodoCard");
     const taskProgressCopy = document.querySelector("#taskProgressCopy");
     const taskProgressValue = document.querySelector("#taskProgressValue");
     const taskProgressTrack = document.querySelector("#taskProgressTrack");
@@ -2053,6 +2065,7 @@
     const processingResult = document.querySelector("#processingResult");
     const processingSteps = Array.from(document.querySelectorAll("[data-run-step]"));
     const workflowState = {
+      agentStarted: false,
       conflict: "initial",
       lowConfidence: "initial",
       highAmount: "initial",
@@ -2118,6 +2131,9 @@
         processingTrack.setAttribute("aria-valuenow", "100");
         processingFill.style.width = "100%";
         processingResult.hidden = false;
+        workflowState.agentStarted = true;
+        workflowState.lastUpdate = "最后更新：Agent 已完成处理并分流";
+        updateTaskState();
       }, 1950);
     }
 
@@ -2189,9 +2205,42 @@
 
     function updateTaskState() {
       const batchCount = workflowState.batchSize - (workflowState.batchExcludedState ? 1 : 0);
+      if (!workflowState.agentStarted) {
+        taskTitleElement.textContent = "23 份资料已就绪，等待 Agent 执行";
+        taskUpdated.textContent = "尚未开始处理";
+        taskStartButton.hidden = false;
+        taskProgressCard.hidden = true;
+        taskTodoCard.hidden = true;
+        [taskDocumentStep, taskMatchingStep, taskVoucherStep, taskReviewStep].forEach((step) => {
+          step.classList.remove("is-done", "is-partial", "is-active");
+        });
+        taskDocumentNote.textContent = "DocumentAgent · 等待读取 23 份资料";
+        taskDocumentStatus.textContent = "未开始";
+        taskMatchingNote.textContent = "MatchingAgent · 等待资料识别完成";
+        taskMatchingStatus.textContent = "未开始";
+        taskVoucherNote.textContent = "VoucherAgent · 等待交易匹配完成";
+        taskVoucherStatus.textContent = "未开始";
+        taskReviewNote.textContent = "审核人员 / 会计 · Agent 分流后开始审核";
+        taskReviewStatus.textContent = "未开始";
+        workbenchTaskStateCopy.textContent = "资料已就绪";
+        workbenchStateDot.classList.remove("is-warning");
+        workbenchBatchLabel.textContent = "待处理资料";
+        workbenchBatchCount.textContent = "23";
+        workbenchConfirmCount.textContent = "0";
+        workbenchManualCount.textContent = "0";
+        return;
+      }
+
       const counts = getTaskCounts();
       const progress = getGlobalProgressState();
       const taskDone = progress.taskDone;
+      taskStartButton.hidden = true;
+      taskProgressCard.hidden = false;
+      taskTodoCard.hidden = false;
+      taskDocumentStep.classList.add("is-done");
+      taskDocumentNote.textContent = "DocumentAgent · 整批已完成 · 23 份资料";
+      taskDocumentStatus.textContent = "已完成";
+      taskMatchingStep.classList.add("is-done");
       const titleParts = [];
       if (taskDone) titleParts.push(`${progress.exportedCount} 份凭证已导出，任务已完成`);
       else if (workflowState.batchExported) titleParts.push(`${batchCount} 份无异常凭证已导出`);
