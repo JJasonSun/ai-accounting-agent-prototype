@@ -1096,6 +1096,14 @@
     .run-name { font-size: var(--text-sm); font-weight: 700; }
     .run-step.is-partial .run-name { color: var(--color-danger); }
     .run-detail { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.6; }
+    .run-output { display: none; margin-block-start: var(--space-xs); }
+    .run-step.is-done .run-output { display: block; }
+    .run-output-bar { display: grid; grid-template-columns: 20fr 1fr; height: 0.45rem; overflow: hidden; background: var(--color-rule-soft); }
+    .run-output-pass { background: var(--color-accent); }
+    .run-output-risk { background: var(--color-danger); }
+    .run-output-legend { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3xs) var(--space-xs); flex-wrap: wrap; margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
+    .run-output-legend strong { color: var(--color-accent-hover); }
+    .run-output-legend .is-risk { color: var(--color-danger); }
     .run-state { color: var(--color-muted); font-size: var(--text-xs); white-space: nowrap; }
     .run-step.is-active .run-state { color: var(--color-danger); font-weight: 700; }
     .run-step.is-done .run-state { color: var(--color-accent-hover); font-weight: 700; }
@@ -1358,7 +1366,14 @@
         </li>
         <li class="run-step" data-run-step="matching">
           <span class="run-index">2</span>
-          <div><div class="run-name">匹配银行流水 · MatchingAgent</div><div class="run-detail">输入：结构化资料 · 工具：当前账套交易检索与匹配规则 · 输出：匹配结果、候选交易和冲突原因</div></div>
+          <div>
+            <div class="run-name">匹配银行流水 · MatchingAgent</div>
+            <div class="run-detail">输入：结构化资料 · 工具：当前账套交易检索与匹配规则 · 输出：匹配结果、候选交易和冲突原因</div>
+            <div class="run-output" aria-label="21 个处理项中，20 项匹配通过，1 项金额冲突已转人工处理">
+              <div class="run-output-bar" aria-hidden="true"><span class="run-output-pass"></span><span class="run-output-risk"></span></div>
+              <div class="run-output-legend"><span><strong>20 项</strong> 匹配通过</span><span class="is-risk"><strong>1 项</strong> 金额冲突 · 已转人工</span></div>
+            </div>
+          </div>
           <span class="run-state">等待上一步</span>
         </li>
         <li class="run-step" data-run-step="voucher">
