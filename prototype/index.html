@@ -250,16 +250,19 @@
     }
 
     .agent-node.is-partial .agent-index {
-      border: 2px solid var(--color-warning);
-      background: var(--color-warning-soft);
+      border: 2px solid var(--color-danger);
+      background: var(--color-danger-soft);
       color: var(--color-danger);
     }
 
     .agent-node.is-active .agent-index {
-      border: 2px solid var(--color-warning);
-      background: var(--color-paper-raised);
+      border: 2px solid var(--color-danger);
+      background: var(--color-danger-soft);
       color: var(--color-danger);
     }
+
+    .agent-node.is-partial .agent-state,
+    .agent-node.is-active .agent-state { color: var(--color-danger); font-weight: 700; }
 
     .agent-copy { min-width: 0; }
 
@@ -835,11 +838,13 @@
     .task-step:last-child { border-block-end: 0; }
     .step-number { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; border: 1px solid var(--color-muted); border-radius: 50%; font-family: var(--font-mono); font-size: var(--text-xs); }
     .task-step.is-done .step-number { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
-    .task-step.is-partial .step-number { border: 2px solid var(--color-warning); background: var(--color-warning-soft); color: var(--color-danger); }
-    .task-step.is-active .step-number { border: 2px solid var(--color-warning); color: var(--color-danger); }
+    .task-step.is-partial .step-number,
+    .task-step.is-active .step-number { border: 2px solid var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger); }
     .task-step-title { font-size: var(--text-sm); font-weight: 700; }
     .task-step-note { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
     .step-status { color: var(--color-muted); font-size: var(--text-xs); white-space: nowrap; }
+    .task-step.is-partial .step-status,
+    .task-step.is-active .step-status { color: var(--color-danger); font-weight: 700; }
     .exception-list { display: grid; gap: var(--space-2xs); margin: 0; padding: 0; list-style: none; }
     .exception-link { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-xs); padding: var(--space-sm); border: 1px solid var(--color-rule); color: inherit; text-decoration: none; }
     a.exception-link:hover { border-color: var(--color-warning); background: var(--color-warning-soft); }
@@ -1084,12 +1089,15 @@
     .run-step.is-active { border-color: var(--color-warning); }
     .run-step.is-active .run-index { border: 2px solid var(--color-warning); background: var(--color-warning-soft); color: var(--color-danger); }
     .run-step.is-done .run-index { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
+    .run-step.is-partial { border-color: var(--color-danger); background: var(--color-danger-soft); }
+    .run-step.is-partial .run-index { border: 2px solid var(--color-danger); background: var(--color-paper-raised); color: var(--color-danger); }
     .run-name { font-size: var(--text-sm); font-weight: 700; }
     .run-detail { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.6; }
     .run-state { color: var(--color-muted); font-size: var(--text-xs); white-space: nowrap; }
     .run-step.is-active .run-state { color: var(--color-danger); font-weight: 700; }
     .run-step.is-done .run-state { color: var(--color-accent-hover); font-weight: 700; }
-    .processing-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); margin-block-start: var(--space-md); padding: var(--space-md); border: 1px solid var(--color-accent); background: var(--color-success-soft); }
+    .run-step.is-partial .run-state { color: var(--color-danger); font-weight: 700; }
+    .processing-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); margin-block-start: var(--space-md); padding: var(--space-md); border: 1px solid var(--color-danger); background: var(--color-danger-soft); }
     .processing-result[hidden] { display: none; }
     .processing-result strong { display: block; font-size: var(--text-sm); }
     .processing-result p { margin: var(--space-3xs) 0 0; color: var(--color-ink-soft); font-size: var(--text-xs); }
@@ -1358,7 +1366,7 @@
       </ol>
 
       <div class="processing-result" id="processingResult" hidden>
-        <div><strong>本批处理完成，已形成 4 组人工工作</strong><p>18 份无异常草稿可批量审核；金额冲突、低置信度和高金额各 1 项进入逐项处理。</p></div>
+        <div><strong>自动处理完成，已形成 4 组人工工作</strong><p>18 份无异常草稿可批量审核；金额冲突、低置信度和高金额各 1 项进入逐项处理。</p></div>
         <a class="button button-primary" href="#task/TASK-2026-07-024">查看任务处理结果</a>
       </div>
     </div>
@@ -1391,7 +1399,7 @@
           <div class="task-steps">
             <div class="task-step is-done" id="taskDocumentStep"><span class="step-number">1</span><div><div class="task-step-title">识别并整理资料</div><div class="task-step-note" id="taskDocumentNote">DocumentAgent · 整批已完成 · 23 份资料</div></div><span class="step-status" id="taskDocumentStatus">已完成</span></div>
             <div class="task-step is-done" id="taskMatchingStep"><span class="step-number">2</span><div><div class="task-step-title">匹配银行流水</div><div class="task-step-note" id="taskMatchingNote">MatchingAgent · 整批已完成 · 1 项金额冲突已分流</div></div><span class="step-status" id="taskMatchingStatus">已完成</span></div>
-            <div class="task-step is-partial" id="taskVoucherStep"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 已生成 19 / 21 份 · 2 项待确认后生成</div></div><span class="step-status" id="taskVoucherStatus">部分完成</span></div>
+            <div class="task-step is-partial" id="taskVoucherStep"><span class="step-number">3</span><div><div class="task-step-title">生成凭证草稿</div><div class="task-step-note" id="taskVoucherNote">VoucherAgent · 已生成 19 / 21 份 · 2 项需人工处理后生成</div></div><span class="step-status" id="taskVoucherStatus">部分完成</span></div>
             <div class="task-step is-active" id="taskReviewStep"><span class="step-number">4</span><div><div class="task-step-title">人工审核并导出</div><div class="task-step-note" id="taskReviewNote">审核人员 / 会计 · 进行中 · 18 份批量审核，3 项逐项处理</div></div><span class="step-status" id="taskReviewStatus">人工审核进行中</span></div>
           </div>
         </section>
@@ -1710,7 +1718,7 @@
           <div class="agent-copy">
             <div class="agent-name">生成凭证草稿</div>
             <div class="agent-role">VoucherAgent</div>
-            <div class="agent-state">已生成 19 / 21 份 · 2 项待确认后生成</div>
+            <div class="agent-state">已生成 19 / 21 份 · 2 项需人工处理后生成</div>
           </div>
         </div>
         <div class="agent-node is-active" data-agent="human">
@@ -2078,7 +2086,7 @@
 
     function setProcessingStep(index, state, copy) {
       const step = processingSteps[index];
-      step.classList.remove("is-active", "is-done");
+      step.classList.remove("is-active", "is-done", "is-partial");
       if (state) step.classList.add(state);
       step.querySelector(".run-state").textContent = copy;
     }
@@ -2121,9 +2129,9 @@
       }, 1300);
 
       schedule(() => {
-        setProcessingStep(2, "is-done", "已完成 · 19 / 21 份");
-        processingTitle.textContent = "Agent 已完成本批处理，等待人工审核";
-        processingStatusCopy.textContent = "21 个处理项已完成分流";
+        setProcessingStep(2, "is-partial", "部分完成 · 19 / 21 份 · 2 项需人工处理后生成");
+        processingTitle.textContent = "Agent 已完成自动处理，等待人工审核";
+        processingStatusCopy.textContent = "21 个处理项已完成识别与分流";
         processingProgressValue.textContent = "100%";
         processingTrack.setAttribute("aria-valuenow", "100");
         processingFill.style.width = "100%";
@@ -2188,7 +2196,7 @@
         ? "整批已完成 · 1 项金额冲突已分流"
         : "整批已完成 · 冲突项已重新匹配";
       const voucher = pendingDraftCount
-        ? `已生成 ${generatedDraftCount} / 21 份 · ${pendingDraftCount} 项待确认后生成`
+        ? `已生成 ${generatedDraftCount} / 21 份 · ${pendingDraftCount} 项需人工处理后生成`
         : "已生成 21 / 21 份 · 全部草稿已形成";
       const human = taskDone
         ? `已完成 · ${exportedCount} 份凭证已导出`
