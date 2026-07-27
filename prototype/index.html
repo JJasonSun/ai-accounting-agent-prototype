@@ -1091,8 +1091,7 @@
     .run-step.is-active { border-color: var(--color-warning); }
     .run-step.is-active .run-index { border: 2px solid var(--color-warning); background: var(--color-warning-soft); color: var(--color-danger); }
     .run-step.is-done .run-index { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
-    .run-step.is-partial { border-color: var(--color-danger); background: var(--color-danger-soft); }
-    .run-step.is-partial .run-index { border: 2px solid var(--color-danger); background: var(--color-paper-raised); color: var(--color-danger); }
+    .run-step.is-partial .run-index { color: var(--color-danger); }
     .run-name { font-size: var(--text-sm); font-weight: 700; }
     .run-step.is-partial .run-name { color: var(--color-danger); }
     .run-detail { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.6; }
@@ -1108,6 +1107,7 @@
     .run-step.is-active .run-state { color: var(--color-danger); font-weight: 700; }
     .run-step.is-done .run-state { color: var(--color-accent-hover); font-weight: 700; }
     .run-step.is-partial .run-state { color: var(--color-danger); font-weight: 700; }
+    .run-state-risk { color: var(--color-danger); }
     .processing-result { display: flex; align-items: center; justify-content: space-between; gap: var(--space-md); margin-block-start: var(--space-md); padding: var(--space-md); border: 1px solid var(--color-danger); background: var(--color-danger-soft); }
     .processing-result[hidden] { display: none; }
     .processing-result strong { display: block; font-size: var(--text-sm); }
@@ -2102,11 +2102,19 @@
     let conflictWorkflowStage = "initial";
     let processingTimers = [];
 
-    function setProcessingStep(index, state, copy) {
+    function setProcessingStep(index, state, copy, riskCopy = "") {
       const step = processingSteps[index];
       step.classList.remove("is-active", "is-done", "is-partial");
       if (state) step.classList.add(state);
-      step.querySelector(".run-state").textContent = copy;
+      const stateCopy = step.querySelector(".run-state");
+      stateCopy.textContent = copy;
+      if (riskCopy) {
+        stateCopy.append(" · ");
+        const risk = document.createElement("span");
+        risk.className = "run-state-risk";
+        risk.textContent = riskCopy;
+        stateCopy.append(risk);
+      }
     }
 
     function startInitialProcessing() {
@@ -2138,7 +2146,7 @@
       }, 650);
 
       schedule(() => {
-        setProcessingStep(1, "is-done", "已完成 · 1 项冲突分流");
+        setProcessingStep(1, "is-done", "已完成", "1 项冲突分流");
         setProcessingStep(2, "is-active", "正在生成草稿");
         processingStatusCopy.textContent = "正在推荐科目并生成凭证草稿";
         processingProgressValue.textContent = "76%";
