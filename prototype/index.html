@@ -833,6 +833,8 @@
     .task-stat.is-danger { border-color: var(--color-danger); }
     .task-stat-label { color: var(--color-muted); font-size: var(--text-xs); }
     .task-stat-value { display: block; margin-block-start: var(--space-3xs); font-family: var(--font-mono); font-size: var(--text-xl); font-weight: 700; }
+    .task-stat-note { display: block; margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.35; }
+    .task-stat.is-danger .task-stat-note { color: var(--color-danger); }
     .task-steps { display: grid; gap: var(--space-2xs); }
     .task-step { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; align-items: center; gap: var(--space-xs); padding-block: var(--space-xs); border-block-end: 1px solid var(--color-rule-soft); }
     .task-step:last-child { border-block-end: 0; }
@@ -1092,6 +1094,7 @@
     .run-step.is-partial { border-color: var(--color-danger); background: var(--color-danger-soft); }
     .run-step.is-partial .run-index { border: 2px solid var(--color-danger); background: var(--color-paper-raised); color: var(--color-danger); }
     .run-name { font-size: var(--text-sm); font-weight: 700; }
+    .run-step.is-partial .run-name { color: var(--color-danger); }
     .run-detail { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.6; }
     .run-state { color: var(--color-muted); font-size: var(--text-xs); white-space: nowrap; }
     .run-step.is-active .run-state { color: var(--color-danger); font-weight: 700; }
@@ -1268,8 +1271,8 @@
           <div class="client-state" id="workbenchTaskState"><span class="state-dot is-warning" id="workbenchStateDot" aria-hidden="true"></span><span id="workbenchTaskStateCopy">等待会计处理</span></div>
           <div class="client-counts" aria-label="任务处理数量">
             <span class="count-block"><span class="count-label" id="workbenchBatchLabel">待批量审核</span><span class="count-value" id="workbenchBatchCount">18</span></span>
-            <span class="count-block"><span class="count-label">待确认</span><span class="count-value" id="workbenchConfirmCount">0</span></span>
-            <span class="count-block"><span class="count-label">人工处理中</span><span class="count-value" id="workbenchManualCount">3</span></span>
+            <span class="count-block"><span class="count-label">中置信度待确认</span><span class="count-value" id="workbenchConfirmCount">0</span></span>
+            <span class="count-block"><span class="count-label">需逐项人工处理</span><span class="count-value" id="workbenchManualCount">3</span></span>
           </div>
           <span class="row-arrow" aria-hidden="true">→</span>
         </a>
@@ -1412,8 +1415,8 @@
           </div>
           <div class="task-stats">
             <div class="task-stat"><span class="task-stat-label" id="taskBatchLabel">待批量审核</span><strong class="task-stat-value" id="taskBatchCount">18</strong></div>
-            <div class="task-stat is-warning"><span class="task-stat-label">需要确认</span><strong class="task-stat-value" id="taskConfirmCount">0</strong></div>
-            <div class="task-stat is-danger"><span class="task-stat-label">必须人工处理</span><strong class="task-stat-value" id="taskManualCount">3</strong></div>
+            <div class="task-stat is-warning"><span class="task-stat-label">中置信度待确认</span><strong class="task-stat-value" id="taskConfirmCount">0</strong><span class="task-stat-note">本批无 60%–85% 的处理项</span></div>
+            <div class="task-stat is-danger"><span class="task-stat-label">需逐项人工处理</span><strong class="task-stat-value" id="taskManualCount">3</strong><span class="task-stat-note">金额冲突 1 · 低于 60% 1 · 高金额 1</span></div>
           </div>
         </section>
 
