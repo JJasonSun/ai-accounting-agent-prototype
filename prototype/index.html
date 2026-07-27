@@ -1892,7 +1892,6 @@
               </label>
               <div class="exception-impact">保存后，系统会根据会计的选择更新凭证草稿。新草稿仍需审核人员批准，AI 不会写入正式账簿。</div>
               <p class="exception-action-status" id="lowConfidenceStatus" aria-live="polite">请选择科目并填写理由。</p>
-              <button class="button button-primary" type="submit" id="lowConfidenceButton">确认科目并更新草稿</button>
               <div class="exception-record" id="lowConfidenceRecord" hidden></div>
               <div id="lowConfidenceReviewPanel" hidden>
                 <h2>审核人员核对新草稿</h2>
@@ -1901,6 +1900,7 @@
                   <label class="risk-check"><input type="checkbox" id="lowDraftCheck"><span>我已核对更新后的凭证草稿，确认可以批准。</span></label>
                 </div>
               </div>
+              <button class="button button-primary" type="submit" id="lowConfidenceButton">确认科目并更新草稿</button>
             </form>
           </div>
         </div>
@@ -1962,7 +1962,6 @@
         </div>
       </div>
       <div class="action-group">
-        <button class="button" type="button" id="resetButton" hidden>恢复演示</button>
         <a class="button button-primary" href="#conflict-review/ITEM-009" id="reviewConflictButton" hidden>审核新草稿</a>
         <button class="button button-primary" type="submit" form="decisionForm" id="confirmButton" disabled>
           <span class="spinner" aria-hidden="true"></span><span id="confirmLabel">确认并重新匹配</span>
@@ -1975,7 +1974,6 @@
     const form = document.querySelector("#decisionForm");
     const confirmButton = document.querySelector("#confirmButton");
     const confirmLabel = document.querySelector("#confirmLabel");
-    const resetButton = document.querySelector("#resetButton");
     const reviewConflictButton = document.querySelector("#reviewConflictButton");
     const statusTitle = document.querySelector("#statusTitle");
     const statusDetail = document.querySelector("#statusDetail");
@@ -2003,7 +2001,6 @@
     const humanNode = document.querySelector('[data-agent="human"]');
     const humanNodeName = humanNode.querySelector(".agent-name");
     const humanNodeRole = humanNode.querySelector(".agent-role");
-    const initialAudit = auditList.innerHTML;
     const taskTitleElement = document.querySelector("#taskTitle");
     const taskTodoTitle = document.querySelector("#todoTitle");
     const taskUpdated = document.querySelector("#taskUpdated");
@@ -2586,35 +2583,11 @@
         statusTitle.textContent = "新草稿已生成，等待审核人员批准";
         statusDetail.textContent = "草稿仍需人工批准；AI 不会写入正式账簿";
         statusIndicator.style.background = "var(--color-accent)";
-        resetButton.hidden = false;
         confirmButton.hidden = true;
         reviewConflictButton.hidden = false;
         syncConflictTaskState("resolved");
         appendAudit("VoucherAgent", "根据新的匹配结果生成凭证草稿，等待审核人员批准。" );
       }, 2200);
-    });
-
-    resetButton.addEventListener("click", () => {
-      form.reset();
-      form.querySelectorAll("input").forEach((input) => { input.disabled = false; });
-      auditList.innerHTML = initialAudit;
-      confirmButton.disabled = true;
-      confirmButton.hidden = false;
-      confirmButton.classList.remove("is-loading");
-      confirmLabel.textContent = "确认并重新匹配";
-      resetButton.hidden = true;
-      reviewConflictButton.hidden = true;
-      statusTitle.textContent = "请选择正确金额";
-      statusDetail.textContent = "确认后重新匹配银行流水，并重新生成凭证草稿";
-      statusIndicator.style.background = "var(--color-warning)";
-      caseStatus.textContent = "资料冲突 · 必须人工处理";
-      processCurrent.textContent = "当前：第 4 步";
-      setAgentState(matchingNode, "is-complete", "发现 1 项金额冲突");
-      setAgentState(voucherNode, "", "等待冲突解除");
-      setAgentState(humanNode, "is-active", "当前步骤");
-      syncConflictTaskState("initial");
-      workflowState.lastUpdate = "最后更新：金额冲突已恢复待处理";
-      updateTaskState();
     });
 
     const conflictReviewForm = document.querySelector("#conflictReviewForm");
@@ -2703,6 +2676,7 @@
       workflowState.lastUpdate = "最后更新：低置信度科目已确认";
       updateTaskState();
       syncLowConfidenceApproval();
+      lowSubjectCheck.focus();
     });
 
     const highAmountForm = document.querySelector("#highAmountForm");
