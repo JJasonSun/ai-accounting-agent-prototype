@@ -261,8 +261,14 @@
       color: var(--color-danger);
     }
 
+    .agent-node.is-ready .agent-index {
+      border-color: var(--color-accent);
+      color: var(--color-accent-hover);
+    }
+
     .agent-node.is-partial .agent-state,
     .agent-node.is-active .agent-state { color: var(--color-danger); font-weight: 700; }
+    .agent-node.is-ready .agent-state { color: var(--color-accent-hover); font-weight: 700; }
 
     .agent-copy { min-width: 0; }
 
@@ -829,6 +835,7 @@
     .progress-fill { width: 100%; height: 100%; background: var(--color-accent); }
     .task-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2xs); margin-block-start: var(--space-md); }
     .task-stat { padding: var(--space-sm); border-block-start: 2px solid var(--color-rule); background: var(--color-paper); }
+    .task-stat.is-success { border-color: var(--color-accent); }
     .task-stat.is-warning { border-color: var(--color-warning); }
     .task-stat.is-danger { border-color: var(--color-danger); }
     .task-stat-label { color: var(--color-muted); font-size: var(--text-xs); }
@@ -842,11 +849,13 @@
     .task-step.is-done .step-number { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
     .task-step.is-partial .step-number,
     .task-step.is-active .step-number { border: 2px solid var(--color-danger); background: var(--color-danger-soft); color: var(--color-danger); }
+    .task-step.is-ready .step-number { border-color: var(--color-accent); color: var(--color-accent-hover); }
     .task-step-title { font-size: var(--text-sm); font-weight: 700; }
     .task-step-note { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
     .step-status { color: var(--color-muted); font-size: var(--text-xs); white-space: nowrap; }
     .task-step.is-partial .step-status,
     .task-step.is-active .step-status { color: var(--color-danger); font-weight: 700; }
+    .task-step.is-ready .step-status { color: var(--color-accent-hover); font-weight: 700; }
     .exception-list { display: grid; gap: var(--space-2xs); margin: 0; padding: 0; list-style: none; }
     .exception-link { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-xs); padding: var(--space-sm); border: 1px solid var(--color-rule); color: inherit; text-decoration: none; }
     a.exception-link:hover { border-color: var(--color-warning); background: var(--color-warning-soft); }
@@ -1280,9 +1289,9 @@
           </div>
           <div class="client-state" id="workbenchTaskState"><span class="state-dot is-warning" id="workbenchStateDot" aria-hidden="true"></span><span id="workbenchTaskStateCopy">等待会计处理</span></div>
           <div class="client-counts" aria-label="任务处理数量">
-            <span class="count-block"><span class="count-label" id="workbenchBatchLabel">待批量审核</span><span class="count-value" id="workbenchBatchCount">18</span></span>
-            <span class="count-block"><span class="count-label">中置信度待确认</span><span class="count-value" id="workbenchConfirmCount">0</span></span>
-            <span class="count-block"><span class="count-label">需逐项人工处理</span><span class="count-value" id="workbenchManualCount">3</span></span>
+            <span class="count-block"><span class="count-label" id="workbenchBatchLabel">待审核</span><span class="count-value" id="workbenchBatchCount">18</span></span>
+            <span class="count-block"><span class="count-label" id="workbenchConfirmLabel">已批准待导出</span><span class="count-value" id="workbenchConfirmCount">0</span></span>
+            <span class="count-block"><span class="count-label" id="workbenchManualLabel">需先人工处理</span><span class="count-value" id="workbenchManualCount">3</span></span>
           </div>
           <span class="row-arrow" aria-hidden="true">→</span>
         </a>
@@ -1445,9 +1454,9 @@
             <div class="progress-track" id="taskProgressTrack" aria-label="处理项分流进度 100%"><div class="progress-fill" id="taskProgressFill"></div></div>
           </div>
           <div class="task-stats">
-            <div class="task-stat"><span class="task-stat-label" id="taskBatchLabel">待批量审核</span><strong class="task-stat-value" id="taskBatchCount">18</strong></div>
-            <div class="task-stat is-warning"><span class="task-stat-label">中置信度待确认</span><strong class="task-stat-value" id="taskConfirmCount">0</strong><span class="task-stat-note">本批无 60%–85% 的处理项</span></div>
-            <div class="task-stat is-danger"><span class="task-stat-label">需逐项人工处理</span><strong class="task-stat-value" id="taskManualCount">3</strong><span class="task-stat-note">金额冲突 1 · 低于 60% 1 · 高金额 1</span></div>
+            <div class="task-stat"><span class="task-stat-label" id="taskBatchLabel">待审核</span><strong class="task-stat-value" id="taskBatchCount">18</strong><span class="task-stat-note" id="taskBatchNote">18 份无异常草稿待批量审核</span></div>
+            <div class="task-stat is-success"><span class="task-stat-label" id="taskConfirmLabel">已批准待导出</span><strong class="task-stat-value" id="taskConfirmCount">0</strong><span class="task-stat-note" id="taskConfirmNote">暂无已批准待导出的草稿</span></div>
+            <div class="task-stat is-danger"><span class="task-stat-label" id="taskManualLabel">需先人工处理</span><strong class="task-stat-value" id="taskManualCount">3</strong><span class="task-stat-note" id="taskManualNote">金额冲突 1 · 低于 60% 1 · 高金额 1</span></div>
           </div>
         </section>
 
@@ -2064,14 +2073,21 @@
     const taskProgressValue = document.querySelector("#taskProgressValue");
     const taskProgressTrack = document.querySelector("#taskProgressTrack");
     const taskProgressFill = document.querySelector("#taskProgressFill");
+    const taskBatchNote = document.querySelector("#taskBatchNote");
+    const taskConfirmLabel = document.querySelector("#taskConfirmLabel");
     const taskConfirmCount = document.querySelector("#taskConfirmCount");
+    const taskConfirmNote = document.querySelector("#taskConfirmNote");
+    const taskManualLabel = document.querySelector("#taskManualLabel");
     const taskManualCount = document.querySelector("#taskManualCount");
+    const taskManualNote = document.querySelector("#taskManualNote");
     const taskBatchLabel = document.querySelector("#taskBatchLabel");
     const taskBatchCount = document.querySelector("#taskBatchCount");
     const taskReviewStatus = document.querySelector("#taskReviewStatus");
     const workbenchBatchLabel = document.querySelector("#workbenchBatchLabel");
     const workbenchBatchCount = document.querySelector("#workbenchBatchCount");
+    const workbenchConfirmLabel = document.querySelector("#workbenchConfirmLabel");
     const workbenchConfirmCount = document.querySelector("#workbenchConfirmCount");
+    const workbenchManualLabel = document.querySelector("#workbenchManualLabel");
     const workbenchManualCount = document.querySelector("#workbenchManualCount");
     const workbenchTaskStateCopy = document.querySelector("#workbenchTaskStateCopy");
     const workbenchStateDot = document.querySelector("#workbenchStateDot");
@@ -2202,6 +2218,33 @@
       return { confirm, manual, approvedPendingExport };
     }
 
+    function getReviewSummary() {
+      const counts = getTaskCounts();
+      const batchCount = getBatchCount();
+      const batchPendingReview = !workflowState.batchApproved && !workflowState.batchExported ? batchCount : 0;
+      const batchApprovedPendingExport = workflowState.batchApproved && !workflowState.batchExported ? batchCount : 0;
+      const pendingReview = batchPendingReview + counts.confirm;
+      const approvedPendingExport = batchApprovedPendingExport + counts.approvedPendingExport;
+      const manualParts = [];
+      if (workflowState.conflict === "initial") manualParts.push("金额冲突 1");
+      if (workflowState.lowConfidence === "initial") manualParts.push("低于 60% 1");
+      if (workflowState.highAmount === "initial") manualParts.push("高金额 1");
+      if (workflowState.batchExcludedState === "redo") manualParts.push("退回重做 1");
+      return {
+        pendingReview,
+        approvedPendingExport,
+        manual: counts.manual,
+        reviewComplete: pendingReview === 0 && counts.manual === 0,
+        pendingReviewNote: pendingReview
+          ? [batchPendingReview ? `${batchPendingReview} 份批量审核` : "", counts.confirm ? `${counts.confirm} 份逐笔审核` : ""].filter(Boolean).join(" · ")
+          : "所有草稿均已完成审核",
+        approvedNote: approvedPendingExport
+          ? [batchApprovedPendingExport ? `${batchApprovedPendingExport} 份批量批准` : "", counts.approvedPendingExport ? `${counts.approvedPendingExport} 份逐笔批准` : ""].filter(Boolean).join(" · ")
+          : "暂无已批准待导出的草稿",
+        manualNote: manualParts.length ? manualParts.join(" · ") : "当前无待人工补充或确认项"
+      };
+    }
+
     function getApprovedExceptionCount() {
       return ["conflict", "lowConfidence", "highAmount"]
         .filter((key) => workflowState[key] === "approved").length;
@@ -2231,9 +2274,9 @@
       const generatedDraftCount = getGeneratedDraftCount();
       const pendingDraftCount = 21 - generatedDraftCount;
       const counts = getTaskCounts();
-      const batchCount = getBatchCount();
       const exportedCount = getExportedCount();
       const taskDone = workflowState.batchExported && counts.confirm === 0 && counts.manual === 0 && counts.approvedPendingExport === 0;
+      const review = getReviewSummary();
       const matching = workflowState.conflict === "initial"
         ? "整批已完成 · 1 项金额冲突已分流"
         : "整批已完成 · 冲突项已重新匹配";
@@ -2242,12 +2285,14 @@
         : "已生成 21 / 21 份 · 全部草稿已形成";
       const human = taskDone
         ? `已完成 · ${exportedCount} 份凭证已导出`
-        : workflowState.batchExported
-          ? `进行中 · ${exportedCount} 份已导出，异常项继续处理`
-          : workflowState.batchApproved
-            ? `进行中 · ${batchCount} 份已批准待导出`
-            : `进行中 · ${batchCount} 份批量审核，3 项逐项处理`;
-      return { generatedDraftCount, pendingDraftCount, taskDone, exportedCount, matching, voucher, human };
+        : review.reviewComplete
+          ? `审核已完成 · ${review.approvedPendingExport} 份已批准待导出`
+          : `审核进行中 · ${[
+              review.pendingReview ? `${review.pendingReview} 份待审核` : "",
+              review.manual ? `${review.manual} 项待人工处理` : "",
+              review.approvedPendingExport ? `${review.approvedPendingExport} 份已批准待导出` : ""
+            ].filter(Boolean).join("，")}`;
+      return { generatedDraftCount, pendingDraftCount, taskDone, exportedCount, matching, voucher, human, review };
     }
 
     function updateTaskState() {
@@ -2259,7 +2304,7 @@
         taskProgressCard.hidden = true;
         taskTodoCard.hidden = true;
         [taskDocumentStep, taskMatchingStep, taskVoucherStep, taskReviewStep].forEach((step) => {
-          step.classList.remove("is-done", "is-partial", "is-active");
+          step.classList.remove("is-done", "is-partial", "is-active", "is-ready");
         });
         taskDocumentNote.textContent = "DocumentAgent · 等待读取 23 份资料";
         taskDocumentStatus.textContent = "未开始";
@@ -2273,7 +2318,9 @@
         workbenchStateDot.classList.remove("is-warning");
         workbenchBatchLabel.textContent = "待处理资料";
         workbenchBatchCount.textContent = "23";
+        workbenchConfirmLabel.textContent = "已批准待导出";
         workbenchConfirmCount.textContent = "0";
+        workbenchManualLabel.textContent = "需先人工处理";
         workbenchManualCount.textContent = "0";
         return;
       }
@@ -2290,20 +2337,41 @@
       taskMatchingStep.classList.add("is-done");
       const titleParts = [];
       if (taskDone) titleParts.push(`${progress.exportedCount} 份凭证已导出，任务已完成`);
+      else if (progress.review.reviewComplete) titleParts.push(`${progress.review.approvedPendingExport} 份凭证已完成审核，等待导出`);
       else if (workflowState.batchExported) titleParts.push(`${batchCount} 份无异常凭证已导出`);
       else if (workflowState.batchApproved) titleParts.push(`${batchCount} 份草稿已批准待导出`);
       else titleParts.push(`${batchCount} 份草稿待批量审核`);
-      if (counts.confirm) titleParts.push(`${counts.confirm} 份草稿待审核`);
-      if (counts.manual) titleParts.push(`${counts.manual} 项待人工处理`);
-      if (counts.approvedPendingExport) titleParts.push(`${counts.approvedPendingExport} 份异常草稿已批准待导出`);
+      if (!progress.review.reviewComplete) {
+        if (counts.confirm) titleParts.push(`${counts.confirm} 份草稿待审核`);
+        if (counts.manual) titleParts.push(`${counts.manual} 项待人工处理`);
+        if (counts.approvedPendingExport) titleParts.push(`${counts.approvedPendingExport} 份异常草稿已批准待导出`);
+      }
       taskTitleElement.textContent = titleParts.join("，");
       taskTodoTitle.textContent = taskDone ? "处理项结果" : "待办事项";
       taskUpdated.textContent = workflowState.lastUpdate;
-      taskConfirmCount.textContent = String(counts.confirm);
-      taskManualCount.textContent = String(counts.manual);
-      workbenchConfirmCount.textContent = String(counts.confirm);
-      workbenchManualCount.textContent = String(counts.manual);
-      workbenchTaskStateCopy.textContent = taskDone ? "任务已完成" : "等待会计处理";
+      const review = progress.review;
+      taskBatchLabel.textContent = taskDone ? "已导出" : "待审核";
+      taskBatchCount.textContent = String(taskDone ? progress.exportedCount : review.pendingReview);
+      taskBatchNote.textContent = taskDone ? "全部已批准凭证均已生成导出记录" : review.pendingReviewNote;
+      taskConfirmLabel.textContent = "已批准待导出";
+      taskConfirmCount.textContent = String(review.approvedPendingExport);
+      taskConfirmNote.textContent = review.approvedNote;
+      taskManualLabel.textContent = "需先人工处理";
+      taskManualCount.textContent = String(review.manual);
+      taskManualNote.textContent = review.manualNote;
+      workbenchBatchLabel.textContent = taskDone ? "已导出" : "待审核";
+      workbenchBatchCount.textContent = String(taskDone ? progress.exportedCount : review.pendingReview);
+      workbenchConfirmLabel.textContent = "已批准待导出";
+      workbenchConfirmCount.textContent = String(review.approvedPendingExport);
+      workbenchManualLabel.textContent = "需先人工处理";
+      workbenchManualCount.textContent = String(review.manual);
+      workbenchTaskStateCopy.textContent = taskDone
+        ? "任务已完成"
+        : review.reviewComplete
+          ? "等待导出"
+          : review.pendingReview
+            ? "等待审核"
+            : "等待会计处理";
       workbenchStateDot.classList.toggle("is-warning", !taskDone);
       taskMatchingNote.textContent = `MatchingAgent · ${progress.matching}`;
       taskMatchingStatus.textContent = "已完成";
@@ -2311,16 +2379,18 @@
       taskVoucherStep.classList.toggle("is-done", progress.pendingDraftCount === 0);
       taskVoucherNote.textContent = `VoucherAgent · ${progress.voucher}`;
       taskVoucherStatus.textContent = progress.pendingDraftCount ? "部分完成" : "已完成";
-      taskReviewStep.classList.toggle("is-active", !taskDone);
+      taskReviewStep.classList.toggle("is-active", !taskDone && !review.reviewComplete);
+      taskReviewStep.classList.toggle("is-ready", !taskDone && review.reviewComplete);
       taskReviewStep.classList.toggle("is-done", taskDone);
       taskReviewNote.textContent = `审核人员 / 会计 · ${progress.human}`;
-      taskReviewStatus.textContent = taskDone ? "已完成" : "人工审核进行中";
+      taskReviewStatus.textContent = taskDone
+        ? "已完成"
+        : review.reviewComplete
+          ? "审核已完成，等待导出"
+          : review.pendingReview
+            ? `还需审核 ${review.pendingReview} 份`
+            : `还有 ${review.manual} 项待人工处理`;
 
-      const batchLabel = workflowState.batchExported ? "已批量导出" : workflowState.batchApproved ? "已批准待导出" : "待批量审核";
-      taskBatchLabel.textContent = batchLabel;
-      taskBatchCount.textContent = String(batchCount);
-      workbenchBatchLabel.textContent = taskDone ? "已导出" : batchLabel;
-      workbenchBatchCount.textContent = String(taskDone ? progress.exportedCount : batchCount);
       taskBatchTodoTitle.textContent = `${batchCount} 份凭证草稿`;
       if (workflowState.batchExported) {
         taskBatchLink.setAttribute("href", "#complete/TASK-2026-07-024");
@@ -2447,7 +2517,7 @@
     }
 
     function setAgentState(node, state, copy) {
-      node.classList.remove("is-active", "is-complete", "is-partial");
+      node.classList.remove("is-active", "is-complete", "is-partial", "is-ready");
       if (state) node.classList.add(state);
       node.querySelector(".agent-state").textContent = copy;
     }
@@ -2458,7 +2528,7 @@
       setAgentState(voucherNode, progress.pendingDraftCount ? "is-partial" : "is-complete", progress.voucher);
       humanNodeName.textContent = "人工审核并导出";
       humanNodeRole.textContent = "审核人员 / 会计";
-      setAgentState(humanNode, progress.taskDone ? "is-complete" : "is-active", progress.human);
+      setAgentState(humanNode, progress.taskDone ? "is-complete" : progress.review.reviewComplete ? "is-ready" : "is-active", progress.human);
     }
 
     function getWorkRouteFromHash() {
