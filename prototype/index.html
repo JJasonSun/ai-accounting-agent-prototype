@@ -1091,13 +1091,13 @@
     .run-step.is-active { border-color: var(--color-warning); }
     .run-step.is-active .run-index { border: 2px solid var(--color-warning); background: var(--color-warning-soft); color: var(--color-danger); }
     .run-step.is-done .run-index { border-color: var(--color-accent); background: var(--color-accent); color: var(--color-accent-ink); }
-    .run-step.is-partial .run-index { color: var(--color-danger); }
     .run-name { font-size: var(--text-sm); font-weight: 700; }
-    .run-step.is-partial .run-name { color: var(--color-danger); }
     .run-detail { margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); line-height: 1.6; }
     .run-output { display: none; margin-block-start: var(--space-xs); }
-    .run-step.is-done .run-output { display: block; }
+    .run-step.is-done .run-output,
+    .run-step.is-partial .run-output { display: block; }
     .run-output-bar { display: grid; grid-template-columns: 20fr 1fr; height: 0.45rem; overflow: hidden; background: var(--color-rule-soft); }
+    .run-output-bar.is-voucher { grid-template-columns: 19fr 2fr; }
     .run-output-pass { background: var(--color-accent); }
     .run-output-risk { background: var(--color-danger); }
     .run-output-legend { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3xs) var(--space-xs); flex-wrap: wrap; margin-block-start: var(--space-3xs); color: var(--color-muted); font-size: var(--text-xs); }
@@ -1378,7 +1378,14 @@
         </li>
         <li class="run-step" data-run-step="voucher">
           <span class="run-index">3</span>
-          <div><div class="run-name">推荐科目并生成草稿 · VoucherAgent</div><div class="run-detail">输入：已匹配交易与业务摘要 · 工具：账套科目表和历史映射 · 输出：凭证草稿、科目置信度和推荐依据</div></div>
+          <div>
+            <div class="run-name">推荐科目并生成草稿 · VoucherAgent</div>
+            <div class="run-detail">输入：已匹配交易与业务摘要 · 工具：账套科目表和历史映射 · 输出：凭证草稿、科目置信度和推荐依据</div>
+            <div class="run-output" aria-label="21 个处理项中，19 项已生成凭证草稿，2 项需人工处理后生成">
+              <div class="run-output-bar is-voucher" aria-hidden="true"><span class="run-output-pass"></span><span class="run-output-risk"></span></div>
+              <div class="run-output-legend"><span><strong>19 项</strong> 草稿已生成</span><span class="is-risk"><strong>2 项</strong> 待人工处理后生成</span></div>
+            </div>
+          </div>
           <span class="run-state">等待上一步</span>
         </li>
       </ol>
